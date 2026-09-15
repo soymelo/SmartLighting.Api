@@ -1,0 +1,27 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SmartLighting.Api.Domain.Entities;
+
+namespace SmartLighting.Api.Infrastructure.Persistence.Configurations;
+
+public sealed class SensorConfiguration : IEntityTypeConfiguration<Sensor>
+{
+    public void Configure(EntityTypeBuilder<Sensor> builder)
+    {
+        builder.ToTable("Sensors");
+
+        builder.HasKey(sensor => sensor.Id);
+
+        builder.Property(sensor => sensor.SensorIdentifier)
+            .HasMaxLength(50)
+            .IsRequired();
+
+        builder.HasIndex(sensor => new { sensor.DeviceId, sensor.SensorIdentifier })
+            .IsUnique();
+
+        builder.HasOne(sensor => sensor.Zone)
+            .WithMany()
+            .HasForeignKey(sensor => sensor.ZoneId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}

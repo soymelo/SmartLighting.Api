@@ -1,0 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using SmartLighting.Api.Domain.Entities;
+
+namespace SmartLighting.Api.Infrastructure.Persistence;
+
+public sealed class SmartLightingDbContext(DbContextOptions<SmartLightingDbContext> options) : DbContext(options)
+{
+    public DbSet<Device> Devices => Set<Device>();
+    public DbSet<Zone> Zones => Set<Zone>();
+    public DbSet<Luminaire> Luminaires => Set<Luminaire>();
+    public DbSet<Sensor> Sensors => Set<Sensor>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(SmartLightingDbContext).Assembly);
+    }
+}
