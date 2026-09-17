@@ -12,33 +12,27 @@ public sealed class DeviceRepository(SmartLightingDbContext dbContext) : IDevice
         var device = await dbContext.Devices
             .AsNoTracking()
             .AsSplitQuery()
-            .Include(device => device.Zones)
-            .ThenInclude(zone => zone.Luminaires)
-            .Include(device => device.Sensors)
-            .SingleOrDefaultAsync(
-                device => device.DeviceIdentifier == deviceIdentifier,
-                ct);
+            .Include(d => d.Zones)
+            .ThenInclude(z => z.Luminaires)
+            .Include(d => d.Sensors)
+            .SingleOrDefaultAsync(d => d.DeviceIdentifier == deviceIdentifier, ct);
 
         if (device is null)
-        {
             return null;
-        }
 
         var zones = device.Zones
-            .OrderBy(zone => zone.DisplayOrder)
-            .Select(zone => new ZoneTopologyResponse(
-                zone.ZoneIdentifier,
-                zone.DisplayOrder,
+            .OrderBy(z => z.DisplayOrder)
+            .Select(z => new ZoneTopologyResponse(z.ZoneIdentifier,z.DisplayOrder,
                 device.Sensors
-                    .Where(sensor => sensor.ZoneId == zone.Id)
-                    .OrderBy(sensor => sensor.SensorIdentifier)
-                    .Select(sensor => new SensorTopologyResponse(sensor.SensorIdentifier))
-                    .ToList(),
-                zone.Luminaires
-                    .OrderBy(luminaire => luminaire.LuminaireIdentifier)
-                    .Select(luminaire => new LuminaireTopologyResponse(
-                        luminaire.LuminaireIdentifier,
-                        luminaire.NominalPowerWatts))
+                      .Where(s => s.ZoneId == z.Id)
+                      .OrderBy(s => s.SensorIdentifier)
+                      .Select(s => new SensorTopologyResponse(s.SensorIdentifier))
+                      .ToList(),
+                z.Luminaires
+                    .OrderBy(l => l.LuminaireIdentifier)
+                    .Select(l => new LuminaireTopologyResponse(
+                        l.LuminaireIdentifier,
+                        l.NominalPowerWatts))
                     .ToList()))
             .ToList();
 
