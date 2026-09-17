@@ -1,17 +1,24 @@
 namespace SmartLighting.Api.Application.Features.Devices.GetDeviceTopology;
 
-public sealed record GetDeviceTopologyResponse(
+public sealed record GetDeviceTopologyResponse
+(
     string DeviceIdentifier,
-    IReadOnlyCollection<ZoneTopologyResponse> Zones);
+    IReadOnlyCollection<GetDeviceTopologyResponse.ZoneResponse> Zones
+)
+{
+    public sealed record ZoneResponse
+    (
+        string ZoneIdentifier,
+        int DisplayOrder,
+        IReadOnlyCollection<SensorResponse> Sensors,
+        IReadOnlyCollection<LuminaireResponse> Luminaires
+    );
 
-public sealed record ZoneTopologyResponse(
-    string ZoneIdentifier,
-    int DisplayOrder,
-    IReadOnlyCollection<SensorTopologyResponse> Sensors,
-    IReadOnlyCollection<LuminaireTopologyResponse> Luminaires);
+    public sealed record SensorResponse(string SensorIdentifier);
 
-public sealed record SensorTopologyResponse(string SensorIdentifier);
-
-public sealed record LuminaireTopologyResponse(
-    string LuminaireIdentifier,
-    decimal NominalPowerWatts);
+    public sealed record LuminaireResponse
+    (
+        string LuminaireIdentifier,
+        decimal NominalPowerWatts
+    );
+}

@@ -3,16 +3,13 @@ using FluentValidation;
 
 namespace SmartLighting.Api.Application.Features.Devices.GetDeviceTopology;
 
-public sealed class GetDeviceTopologyRequest
-{
-    public string DeviceIdentifier { get; init; } = string.Empty;
-}
+public sealed record GetDeviceTopologyRequest(string DeviceIdentifier);
 
 public sealed class GetDeviceTopologyValidator : Validator<GetDeviceTopologyRequest>
 {
     public GetDeviceTopologyValidator()
     {
-        RuleFor(request => request.DeviceIdentifier)
+        RuleFor(x => x.DeviceIdentifier)
             .NotEmpty()
             .MaximumLength(50);
     }

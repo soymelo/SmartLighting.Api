@@ -1,10 +1,10 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.EntityFrameworkCore;
-using SmartLighting.Api.Application.Abstractions.Repositories;
+using SmartLighting.Api.Application.Abstractions.Queries;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceTopology;
 using SmartLighting.Api.Infrastructure.Persistence;
-using SmartLighting.Api.Infrastructure.Repositories;
+using SmartLighting.Api.Infrastructure.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +14,7 @@ var connectionString = builder.Configuration.GetConnectionString("SmartLightingD
 builder.Services.AddDbContext<SmartLightingDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<IDeviceQueryRepository, DeviceQueryRepository>();
 builder.Services.AddScoped<GetDeviceTopologyProcessor>();
 
 builder.Services.AddFastEndpoints();
