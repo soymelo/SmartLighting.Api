@@ -15,5 +15,10 @@ public sealed class SensorConfiguration : IEntityTypeConfiguration<Sensor>
         builder.Property(sensor => sensor.Name)
             .HasMaxLength(50)
             .IsRequired();
+
+        builder.HasMany(sensor => sensor.Events)
+            .WithOne(sensorEvent => sensorEvent.Sensor)
+            .HasForeignKey(sensorEvent => sensorEvent.SensorId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

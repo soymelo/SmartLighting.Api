@@ -28,6 +28,9 @@ namespace SmartLighting.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("LastTelemetryAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -66,6 +69,56 @@ namespace SmartLighting.Api.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.LuminaireState", b =>
+                {
+                    b.Property<Guid>("LuminaireId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BrightnessPercentage")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("LuminaireId");
+
+                    b.ToTable("LuminaireStates", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_LuminaireStates_BrightnessPercentage", "[BrightnessPercentage] BETWEEN 0 AND 100");
+                        });
+                });
+
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.LuminaireStateChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BrightnessPercentage")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ChangedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EventIdentifier")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LuminaireId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventIdentifier")
+                        .IsUnique();
+
+                    b.HasIndex("LuminaireId", "ChangedAtUtc");
+
+                    b.ToTable("LuminaireStateChanges", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_LuminaireStateChanges_BrightnessPercentage", "[BrightnessPercentage] BETWEEN 0 AND 100");
+                        });
+                });
+
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Sensor", b =>
                 {
                     b.Property<Guid>("Id")
@@ -85,6 +138,31 @@ namespace SmartLighting.Api.Migrations
                     b.HasIndex("ZoneId");
 
                     b.ToTable("Sensors", (string)null);
+                });
+
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.SensorEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EventIdentifier")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("SensorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventIdentifier")
+                        .IsUnique();
+
+                    b.HasIndex("SensorId", "OccurredAtUtc");
+
+                    b.ToTable("SensorEvents", (string)null);
                 });
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Zone", b =>
@@ -123,6 +201,28 @@ namespace SmartLighting.Api.Migrations
                     b.Navigation("Zone");
                 });
 
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.LuminaireState", b =>
+                {
+                    b.HasOne("SmartLighting.Api.Domain.Entities.Luminaire", "Luminaire")
+                        .WithOne("State")
+                        .HasForeignKey("SmartLighting.Api.Domain.Entities.LuminaireState", "LuminaireId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Luminaire");
+                });
+
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.LuminaireStateChange", b =>
+                {
+                    b.HasOne("SmartLighting.Api.Domain.Entities.Luminaire", "Luminaire")
+                        .WithMany("StateChanges")
+                        .HasForeignKey("LuminaireId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Luminaire");
+                });
+
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Sensor", b =>
                 {
                     b.HasOne("SmartLighting.Api.Domain.Entities.Zone", "Zone")
@@ -132,6 +232,17 @@ namespace SmartLighting.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Zone");
+                });
+
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.SensorEvent", b =>
+                {
+                    b.HasOne("SmartLighting.Api.Domain.Entities.Sensor", "Sensor")
+                        .WithMany("Events")
+                        .HasForeignKey("SensorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Sensor");
                 });
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Zone", b =>
@@ -148,6 +259,18 @@ namespace SmartLighting.Api.Migrations
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Device", b =>
                 {
                     b.Navigation("Zones");
+                });
+
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Luminaire", b =>
+                {
+                    b.Navigation("State");
+
+                    b.Navigation("StateChanges");
+                });
+
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Sensor", b =>
+                {
+                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Zone", b =>

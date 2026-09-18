@@ -8,4 +8,6 @@ public sealed class Luminaire
     public decimal NominalPowerWatts { get; set; }
 
     public Zone Zone { get; set; } = null!;
+    public LuminaireState? State { get; set; }
+    public ICollection<LuminaireStateChange> StateChanges { get; set; } = new List<LuminaireStateChange>();
 }

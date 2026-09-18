@@ -9,6 +9,9 @@ public sealed class SmartLightingDbContext(DbContextOptions<SmartLightingDbConte
     public DbSet<Zone> Zones => Set<Zone>();
     public DbSet<Luminaire> Luminaires => Set<Luminaire>();
     public DbSet<Sensor> Sensors => Set<Sensor>();
+    public DbSet<SensorEvent> SensorEvents => Set<SensorEvent>();
+    public DbSet<LuminaireStateChange> LuminaireStateChanges => Set<LuminaireStateChange>();
+    public DbSet<LuminaireState> LuminaireStates => Set<LuminaireState>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
