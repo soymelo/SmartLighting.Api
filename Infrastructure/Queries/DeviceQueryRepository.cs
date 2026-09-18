@@ -8,35 +8,33 @@ namespace SmartLighting.Api.Infrastructure.Queries;
 public sealed class DeviceQueryRepository(IConfiguration configuration) : IDeviceQueryRepository
 {
     private const string Sql = """
-        SELECT d.DeviceIdentifier
+        SELECT d.Id, d.Name
         FROM Devices AS d
-        WHERE d.DeviceIdentifier = @DeviceIdentifier;
+        WHERE d.Id = @DeviceId;
 
-        SELECT z.Id, z.ZoneIdentifier, z.DisplayOrder
+        SELECT z.Id, z.Name, z.DisplayOrder
         FROM Zones AS z
-        INNER JOIN Devices AS d ON d.Id = z.DeviceId
-        WHERE d.DeviceIdentifier = @DeviceIdentifier
+        WHERE z.DeviceId = @DeviceId
         ORDER BY z.DisplayOrder;
 
-        SELECT s.ZoneId, s.SensorIdentifier
+        SELECT s.Id, s.ZoneId, s.Name
         FROM Sensors AS s
-        INNER JOIN Devices AS d ON d.Id = s.DeviceId
-        WHERE d.DeviceIdentifier = @DeviceIdentifier
-        ORDER BY s.ZoneId, s.SensorIdentifier;
+        INNER JOIN Zones AS z ON z.Id = s.ZoneId
+        WHERE z.DeviceId = @DeviceId
+        ORDER BY s.ZoneId, s.Name;
 
-        SELECT l.ZoneId, l.LuminaireIdentifier, l.NominalPowerWatts
+        SELECT l.Id, l.ZoneId, l.Name, l.NominalPowerWatts
         FROM Luminaires AS l
         INNER JOIN Zones AS z ON z.Id = l.ZoneId
-        INNER JOIN Devices AS d ON d.Id = z.DeviceId
-        WHERE d.DeviceIdentifier = @DeviceIdentifier
-        ORDER BY l.ZoneId, l.LuminaireIdentifier;
+        WHERE z.DeviceId = @DeviceId
+        ORDER BY l.ZoneId, l.Name;
         """;
 
     private readonly string _connectionString = configuration.GetConnectionString("SmartLightingDatabase")
         ?? throw new InvalidOperationException("A connection string 'SmartLightingDatabase' não foi configurada.");
 
-    public async Task<DeviceTopologyDto?> GetTopologyByIdentifierAsync(
-        string deviceIdentifier,
+    public async Task<DeviceTopologyDto?> GetTopologyByIdAsync(
+        Guid deviceId,
         CancellationToken ct)
     {
         await using var connection = new SqlConnection(_connectionString);
@@ -44,7 +42,7 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
 
         var command = new CommandDefinition(
             Sql,
-            new { DeviceIdentifier = deviceIdentifier },
+            new { DeviceId = deviceId },
             cancellationToken: ct);
 
         using var results = await connection.QueryMultipleAsync(command);
@@ -62,7 +60,7 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
             .ToDictionary(
                 group => group.Key,
                 group => (IReadOnlyCollection<DeviceTopologySensorDto>)group
-                    .Select(sensor => new DeviceTopologySensorDto(sensor.SensorIdentifier))
+                    .Select(sensor => new DeviceTopologySensorDto(sensor.Id, sensor.Name))
                     .ToList());
         var luminairesByZone = (await results.ReadAsync<LuminaireRow>())
             .GroupBy(luminaire => luminaire.ZoneId)
@@ -70,43 +68,48 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
                 group => group.Key,
                 group => (IReadOnlyCollection<DeviceTopologyLuminaireDto>)group
                     .Select(luminaire => new DeviceTopologyLuminaireDto(
-                        luminaire.LuminaireIdentifier,
+                        luminaire.Id,
+                        luminaire.Name,
                         luminaire.NominalPowerWatts))
                     .ToList());
 
         var zoneDtos = zones
             .Select(zone => new DeviceTopologyZoneDto(
-                zone.ZoneIdentifier,
+                zone.Id,
+                zone.Name,
                 zone.DisplayOrder,
                 sensorsByZone.GetValueOrDefault(zone.Id, Array.Empty<DeviceTopologySensorDto>()),
                 luminairesByZone.GetValueOrDefault(zone.Id, Array.Empty<DeviceTopologyLuminaireDto>())))
             .ToList();
 
-        return new DeviceTopologyDto(device.DeviceIdentifier, zoneDtos);
+        return new DeviceTopologyDto(device.Id, device.Name, zoneDtos);
     }
 
     private sealed class DeviceRow
     {
-        public string DeviceIdentifier { get; init; } = string.Empty;
+        public Guid Id { get; init; }
+        public string Name { get; init; } = string.Empty;
     }
 
     private sealed class ZoneRow
     {
         public Guid Id { get; init; }
-        public string ZoneIdentifier { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
         public int DisplayOrder { get; init; }
     }
 
     private sealed class SensorRow
     {
+        public Guid Id { get; init; }
         public Guid ZoneId { get; init; }
-        public string SensorIdentifier { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
     }
 
     private sealed class LuminaireRow
     {
+        public Guid Id { get; init; }
         public Guid ZoneId { get; init; }
-        public string LuminaireIdentifier { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
         public decimal NominalPowerWatts { get; init; }
     }
 }

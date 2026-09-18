@@ -12,12 +12,9 @@ public sealed class ZoneConfiguration : IEntityTypeConfiguration<Zone>
 
         builder.HasKey(zone => zone.Id);
 
-        builder.Property(zone => zone.ZoneIdentifier)
+        builder.Property(zone => zone.Name)
             .HasMaxLength(50)
             .IsRequired();
-
-        builder.HasIndex(zone => new { zone.DeviceId, zone.ZoneIdentifier })
-            .IsUnique();
 
         builder.HasIndex(zone => new { zone.DeviceId, zone.DisplayOrder })
             .IsUnique();
@@ -26,5 +23,10 @@ public sealed class ZoneConfiguration : IEntityTypeConfiguration<Zone>
             .WithOne(luminaire => luminaire.Zone)
             .HasForeignKey(luminaire => luminaire.ZoneId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(zone => zone.Sensors)
+            .WithOne(sensor => sensor.Zone)
+            .HasForeignKey(sensor => sensor.ZoneId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

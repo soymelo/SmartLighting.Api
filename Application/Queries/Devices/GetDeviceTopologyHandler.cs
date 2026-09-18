@@ -9,7 +9,7 @@ public sealed class GetDeviceTopologyHandler(IDeviceQueryRepository deviceQueryR
 {
     public async Task<GetDeviceTopologyResponse?> ExecuteAsync(GetDeviceTopologyQuery query, CancellationToken ct)
     {
-        var device = await deviceQueryRepository.GetTopologyByIdentifierAsync(query.DeviceIdentifier, ct);
+        var device = await deviceQueryRepository.GetTopologyByIdAsync(query.DeviceId, ct);
 
         if (device is null)
         {
@@ -18,18 +18,20 @@ public sealed class GetDeviceTopologyHandler(IDeviceQueryRepository deviceQueryR
 
         var zones = device.Zones
             .Select(zone => new GetDeviceTopologyResponse.ZoneResponse(
-                zone.ZoneIdentifier,
+                zone.ZoneId,
+                zone.Name,
                 zone.DisplayOrder,
                 zone.Sensors
-                    .Select(sensor => new GetDeviceTopologyResponse.SensorResponse(sensor.SensorIdentifier))
+                    .Select(sensor => new GetDeviceTopologyResponse.SensorResponse(sensor.SensorId, sensor.Name))
                     .ToList(),
                 zone.Luminaires
                     .Select(luminaire => new GetDeviceTopologyResponse.LuminaireResponse(
-                        luminaire.LuminaireIdentifier,
+                        luminaire.LuminaireId,
+                        luminaire.Name,
                         luminaire.NominalPowerWatts))
-                    .ToList()))
+            .ToList()))
             .ToList();
 
-        return new GetDeviceTopologyResponse(device.DeviceIdentifier, zones);
+        return new GetDeviceTopologyResponse(device.DeviceId, device.Name, zones);
     }
 }

@@ -1,17 +1,20 @@
 namespace SmartLighting.Api.Application.ReadModels.Devices;
 
 public sealed record DeviceTopologyDto(
-    string DeviceIdentifier,
+    Guid DeviceId,
+    string Name,
     IReadOnlyCollection<DeviceTopologyZoneDto> Zones);
 
 public sealed record DeviceTopologyZoneDto(
-    string ZoneIdentifier,
+    Guid ZoneId,
+    string Name,
     int DisplayOrder,
     IReadOnlyCollection<DeviceTopologySensorDto> Sensors,
     IReadOnlyCollection<DeviceTopologyLuminaireDto> Luminaires);
 
-public sealed record DeviceTopologySensorDto(string SensorIdentifier);
+public sealed record DeviceTopologySensorDto(Guid SensorId, string Name);
 
 public sealed record DeviceTopologyLuminaireDto(
-    string LuminaireIdentifier,
+    Guid LuminaireId,
+    string Name,
     decimal NominalPowerWatts);

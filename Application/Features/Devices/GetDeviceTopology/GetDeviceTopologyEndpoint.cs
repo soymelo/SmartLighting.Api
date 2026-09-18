@@ -7,7 +7,7 @@ public sealed class GetDeviceTopologyEndpoint(GetDeviceTopologyProcessor process
 {
     public override void Configure()
     {
-        Get("/devices/{deviceIdentifier}/topology");
+        Get("/devices/{deviceId}/topology");
         Tags("Devices");
         AllowAnonymous();
 

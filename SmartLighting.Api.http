@@ -1,6 +1,7 @@
 @SmartLighting.Api_HostAddress = http://localhost:5282
+@DeviceId = 00000000-0000-0000-0000-000000000000
 
-GET {{SmartLighting.Api_HostAddress}}/weatherforecast/
+GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/topology
 Accept: application/json
 
 ###

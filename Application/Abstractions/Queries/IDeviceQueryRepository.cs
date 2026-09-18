@@ -4,7 +4,5 @@ namespace SmartLighting.Api.Application.Abstractions.Queries;
 
 public interface IDeviceQueryRepository
 {
-    Task<DeviceTopologyDto?> GetTopologyByIdentifierAsync(
-        string deviceIdentifier,
-        CancellationToken ct);
+    Task<DeviceTopologyDto?> GetTopologyByIdAsync(Guid deviceId, CancellationToken ct);
 }

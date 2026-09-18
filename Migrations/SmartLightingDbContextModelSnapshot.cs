@@ -28,15 +28,12 @@ namespace SmartLighting.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("DeviceIdentifier")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DeviceIdentifier")
-                        .IsUnique();
 
                     b.ToTable("Devices", (string)null);
                 });
@@ -47,7 +44,7 @@ namespace SmartLighting.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("LuminaireIdentifier")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -61,8 +58,7 @@ namespace SmartLighting.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ZoneId", "LuminaireIdentifier")
-                        .IsUnique();
+                    b.HasIndex("ZoneId");
 
                     b.ToTable("Luminaires", null, t =>
                         {
@@ -76,10 +72,7 @@ namespace SmartLighting.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SensorIdentifier")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -90,9 +83,6 @@ namespace SmartLighting.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ZoneId");
-
-                    b.HasIndex("DeviceId", "SensorIdentifier")
-                        .IsUnique();
 
                     b.ToTable("Sensors", (string)null);
                 });
@@ -109,7 +99,7 @@ namespace SmartLighting.Api.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("int");
 
-                    b.Property<string>("ZoneIdentifier")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -117,9 +107,6 @@ namespace SmartLighting.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DeviceId", "DisplayOrder")
-                        .IsUnique();
-
-                    b.HasIndex("DeviceId", "ZoneIdentifier")
                         .IsUnique();
 
                     b.ToTable("Zones", (string)null);
@@ -138,19 +125,11 @@ namespace SmartLighting.Api.Migrations
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Sensor", b =>
                 {
-                    b.HasOne("SmartLighting.Api.Domain.Entities.Device", "Device")
-                        .WithMany("Sensors")
-                        .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SmartLighting.Api.Domain.Entities.Zone", "Zone")
-                        .WithMany()
+                        .WithMany("Sensors")
                         .HasForeignKey("ZoneId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Device");
 
                     b.Navigation("Zone");
                 });
@@ -168,14 +147,14 @@ namespace SmartLighting.Api.Migrations
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Device", b =>
                 {
-                    b.Navigation("Sensors");
-
                     b.Navigation("Zones");
                 });
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Zone", b =>
                 {
                     b.Navigation("Luminaires");
+
+                    b.Navigation("Sensors");
                 });
 #pragma warning restore 612, 618
         }

@@ -13,14 +13,12 @@ public sealed class LuminaireConfiguration : IEntityTypeConfiguration<Luminaire>
 
         builder.HasKey(luminaire => luminaire.Id);
 
-        builder.Property(luminaire => luminaire.LuminaireIdentifier)
+        builder.Property(luminaire => luminaire.Name)
             .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(luminaire => luminaire.NominalPowerWatts)
             .HasPrecision(10, 2);
 
-        builder.HasIndex(luminaire => new { luminaire.ZoneId, luminaire.LuminaireIdentifier })
-            .IsUnique();
     }
 }

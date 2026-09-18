@@ -12,16 +12,8 @@ public sealed class SensorConfiguration : IEntityTypeConfiguration<Sensor>
 
         builder.HasKey(sensor => sensor.Id);
 
-        builder.Property(sensor => sensor.SensorIdentifier)
+        builder.Property(sensor => sensor.Name)
             .HasMaxLength(50)
             .IsRequired();
-
-        builder.HasIndex(sensor => new { sensor.DeviceId, sensor.SensorIdentifier })
-            .IsUnique();
-
-        builder.HasOne(sensor => sensor.Zone)
-            .WithMany()
-            .HasForeignKey(sensor => sensor.ZoneId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

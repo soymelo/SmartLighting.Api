@@ -7,7 +7,7 @@ public sealed class GetDeviceTopologyProcessor
 {
     public Task<GetDeviceTopologyResponse?> HandleAsync(GetDeviceTopologyRequest req, CancellationToken ct)
     {
-        var query = new GetDeviceTopologyQuery(req.DeviceIdentifier);
+        var query = new GetDeviceTopologyQuery(req.DeviceId);
 
         return query.ExecuteAsync(ct);
     }
