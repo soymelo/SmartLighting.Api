@@ -49,6 +49,19 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
         ORDER BY z.DisplayOrder, l.Name, l.Id;
         """;
 
+    private const string RecentSensorEventsSql = """
+        SELECT d.Id, d.Name
+        FROM Devices AS d
+        WHERE d.Id = @DeviceId;
+
+        SELECT TOP (@Limit) se.EventIdentifier, se.SensorId, se.OccurredAtUtc
+        FROM SensorEvents AS se
+        INNER JOIN Sensors AS s ON s.Id = se.SensorId
+        INNER JOIN Zones AS z ON z.Id = s.ZoneId
+        WHERE z.DeviceId = @DeviceId
+        ORDER BY se.OccurredAtUtc DESC, se.EventIdentifier DESC;
+        """;
+
     private readonly string _connectionString = configuration.GetConnectionString("SmartLightingDatabase")
         ?? throw new InvalidOperationException("A connection string 'SmartLightingDatabase' não foi configurada.");
 
@@ -156,6 +169,38 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
         return new DeviceLuminaireStatesDto(device.Id, luminaires);
     }
 
+    public async Task<DeviceRecentSensorEventsDto?> GetRecentSensorEventsByDeviceIdAsync(
+        Guid deviceId,
+        int limit,
+        CancellationToken ct)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(ct);
+
+        var command = new CommandDefinition(
+            RecentSensorEventsSql,
+            new { DeviceId = deviceId, Limit = limit },
+            cancellationToken: ct);
+
+        using var results = await connection.QueryMultipleAsync(command);
+
+        var device = await results.ReadSingleOrDefaultAsync<DeviceRow>();
+
+        if (device is null)
+        {
+            return null;
+        }
+
+        var events = (await results.ReadAsync<SensorEventRow>())
+            .Select(sensorEvent => new DeviceRecentSensorEventDto(
+                sensorEvent.EventIdentifier,
+                sensorEvent.SensorId,
+                DateTime.SpecifyKind(sensorEvent.OccurredAtUtc, DateTimeKind.Utc)))
+            .ToList();
+
+        return new DeviceRecentSensorEventsDto(device.Id, events);
+    }
+
     private static DateTime? ToUtc(DateTime? value) => value is null
         ? null
         : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc);
@@ -199,5 +244,12 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
         public Guid LuminaireId { get; init; }
         public int? BrightnessPercentage { get; init; }
         public DateTime? UpdatedAtUtc { get; init; }
+    }
+
+    private sealed class SensorEventRow
+    {
+        public Guid EventIdentifier { get; init; }
+        public Guid SensorId { get; init; }
+        public DateTime OccurredAtUtc { get; init; }
     }
 }

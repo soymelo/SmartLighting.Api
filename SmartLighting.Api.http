@@ -15,3 +15,8 @@ GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry/luminaire-s
 Accept: application/json
 
 ###
+
+GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry/sensor-events?limit=50
+Accept: application/json
+
+###

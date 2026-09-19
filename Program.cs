@@ -6,6 +6,7 @@ using SmartLighting.Api.Application.Abstractions.Repositories;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceLuminaireStates;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceTelemetryStatus;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceTopology;
+using SmartLighting.Api.Application.Features.Devices.GetRecentSensorEvents;
 using SmartLighting.Api.Application.Features.Devices.SubmitTelemetry;
 using SmartLighting.Api.Infrastructure.Persistence;
 using SmartLighting.Api.Infrastructure.Queries;
@@ -24,6 +25,7 @@ builder.Services.AddScoped<ITelemetryRepository, TelemetryRepository>();
 builder.Services.AddScoped<GetDeviceLuminaireStatesProcessor>();
 builder.Services.AddScoped<GetDeviceTelemetryStatusProcessor>();
 builder.Services.AddScoped<GetDeviceTopologyProcessor>();
+builder.Services.AddScoped<GetRecentSensorEventsProcessor>();
 builder.Services.AddScoped<SubmitTelemetryProcessor>();
 
 builder.Services.AddFastEndpoints();
