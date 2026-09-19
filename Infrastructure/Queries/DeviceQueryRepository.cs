@@ -7,7 +7,7 @@ namespace SmartLighting.Api.Infrastructure.Queries;
 
 public sealed class DeviceQueryRepository(IConfiguration configuration) : IDeviceQueryRepository
 {
-    private const string Sql = """
+    private const string TopologySql = """
         SELECT d.Id, d.Name
         FROM Devices AS d
         WHERE d.Id = @DeviceId;
@@ -30,6 +30,12 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
         ORDER BY l.ZoneId, l.Name;
         """;
 
+    private const string TelemetryStatusSql = """
+        SELECT d.Id, d.LastTelemetryAtUtc
+        FROM Devices AS d
+        WHERE d.Id = @DeviceId;
+        """;
+
     private readonly string _connectionString = configuration.GetConnectionString("SmartLightingDatabase")
         ?? throw new InvalidOperationException("A connection string 'SmartLightingDatabase' não foi configurada.");
 
@@ -41,7 +47,7 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
         await connection.OpenAsync(ct);
 
         var command = new CommandDefinition(
-            Sql,
+            TopologySql,
             new { DeviceId = deviceId },
             cancellationToken: ct);
 
@@ -85,6 +91,31 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
         return new DeviceTopologyDto(device.Id, device.Name, zoneDtos);
     }
 
+    public async Task<DeviceTelemetryStatusDto?> GetTelemetryStatusByIdAsync(
+        Guid deviceId,
+        CancellationToken ct)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(ct);
+
+        var command = new CommandDefinition(
+            TelemetryStatusSql,
+            new { DeviceId = deviceId },
+            cancellationToken: ct);
+        var device = await connection.QuerySingleOrDefaultAsync<DeviceTelemetryStatusRow>(command);
+
+        if (device is null)
+        {
+            return null;
+        }
+
+        var lastTelemetryAtUtc = device.LastTelemetryAtUtc is null
+            ? (DateTime?)null
+            : DateTime.SpecifyKind(device.LastTelemetryAtUtc.Value, DateTimeKind.Utc);
+
+        return new DeviceTelemetryStatusDto(device.Id, lastTelemetryAtUtc);
+    }
+
     private sealed class DeviceRow
     {
         public Guid Id { get; init; }
@@ -111,5 +142,11 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
         public Guid ZoneId { get; init; }
         public string Name { get; init; } = string.Empty;
         public decimal NominalPowerWatts { get; init; }
+    }
+
+    private sealed class DeviceTelemetryStatusRow
+    {
+        public Guid Id { get; init; }
+        public DateTime? LastTelemetryAtUtc { get; init; }
     }
 }

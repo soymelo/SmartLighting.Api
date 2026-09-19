@@ -5,4 +5,5 @@ namespace SmartLighting.Api.Application.Abstractions.Queries;
 public interface IDeviceQueryRepository
 {
     Task<DeviceTopologyDto?> GetTopologyByIdAsync(Guid deviceId, CancellationToken ct);
+    Task<DeviceTelemetryStatusDto?> GetTelemetryStatusByIdAsync(Guid deviceId, CancellationToken ct);
 }

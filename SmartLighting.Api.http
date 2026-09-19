@@ -1,7 +1,12 @@
 @SmartLighting.Api_HostAddress = http://localhost:5282
-@DeviceId = 00000000-0000-0000-0000-000000000000
+@DeviceId = A0000000-0000-0000-0000-000000000001
 
 GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/topology
+Accept: application/json
+
+###
+
+GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry/status
 Accept: application/json
 
 ###
