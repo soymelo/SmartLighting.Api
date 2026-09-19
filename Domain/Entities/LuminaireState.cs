@@ -7,4 +7,17 @@ public sealed class LuminaireState
     public DateTime UpdatedAtUtc { get; set; }
 
     public Luminaire Luminaire { get; set; } = null!;
+
+    public bool TryUpdate(int brightnessPercentage, DateTime updatedAtUtc)
+    {
+        if (updatedAtUtc <= UpdatedAtUtc)
+        {
+            return false;
+        }
+
+        BrightnessPercentage = brightnessPercentage;
+        UpdatedAtUtc = updatedAtUtc;
+
+        return true;
+    }
 }
