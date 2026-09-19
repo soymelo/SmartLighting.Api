@@ -3,6 +3,7 @@ using FastEndpoints.Swagger;
 using Microsoft.EntityFrameworkCore;
 using SmartLighting.Api.Application.Abstractions.Queries;
 using SmartLighting.Api.Application.Abstractions.Repositories;
+using SmartLighting.Api.Application.Features.Devices.GetDeviceLuminaireStates;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceTelemetryStatus;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceTopology;
 using SmartLighting.Api.Application.Features.Devices.SubmitTelemetry;
@@ -20,6 +21,7 @@ builder.Services.AddDbContext<SmartLightingDbContext>(options =>
 
 builder.Services.AddScoped<IDeviceQueryRepository, DeviceQueryRepository>();
 builder.Services.AddScoped<ITelemetryRepository, TelemetryRepository>();
+builder.Services.AddScoped<GetDeviceLuminaireStatesProcessor>();
 builder.Services.AddScoped<GetDeviceTelemetryStatusProcessor>();
 builder.Services.AddScoped<GetDeviceTopologyProcessor>();
 builder.Services.AddScoped<SubmitTelemetryProcessor>();

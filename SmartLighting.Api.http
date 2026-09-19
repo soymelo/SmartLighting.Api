@@ -10,3 +10,8 @@ GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry/status
 Accept: application/json
 
 ###
+
+GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry/luminaire-states
+Accept: application/json
+
+###
