@@ -13,6 +13,34 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
         ORDER BY d.Name, d.Id;
         """;
 
+    private const string DashboardSql = """
+        SELECT d.Id, d.Name, d.LastTelemetryAtUtc
+        FROM Devices AS d
+        WHERE d.Id = @DeviceId;
+
+        SELECT l.Id AS LuminaireId,
+               l.Name,
+               z.Name AS ZoneName,
+               ls.BrightnessPercentage,
+               ls.UpdatedAtUtc
+        FROM Luminaires AS l
+        INNER JOIN Zones AS z ON z.Id = l.ZoneId
+        LEFT JOIN LuminaireStates AS ls ON ls.LuminaireId = l.Id
+        WHERE z.DeviceId = @DeviceId
+        ORDER BY z.DisplayOrder, l.Name, l.Id;
+
+        SELECT TOP (50) se.EventIdentifier,
+                        se.SensorId,
+                        s.Name AS SensorName,
+                        z.Name AS ZoneName,
+                        se.OccurredAtUtc
+        FROM SensorEvents AS se
+        INNER JOIN Sensors AS s ON s.Id = se.SensorId
+        INNER JOIN Zones AS z ON z.Id = s.ZoneId
+        WHERE z.DeviceId = @DeviceId
+        ORDER BY se.OccurredAtUtc DESC, se.EventIdentifier DESC;
+        """;
+
     private const string TopologySql = """
         SELECT d.Id, d.Name
         FROM Devices AS d
@@ -85,6 +113,53 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
                 device.Name,
                 ToUtc(device.LastTelemetryAtUtc)))
             .ToList();
+    }
+
+    public async Task<DeviceDashboardDto?> GetDashboardByIdAsync(
+        Guid deviceId,
+        CancellationToken ct)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(ct);
+
+        var command = new CommandDefinition(
+            DashboardSql,
+            new { DeviceId = deviceId },
+            cancellationToken: ct);
+
+        using var results = await connection.QueryMultipleAsync(command);
+
+        var device = await results.ReadSingleOrDefaultAsync<DeviceRow>();
+
+        if (device is null)
+        {
+            return null;
+        }
+
+        var luminaires = (await results.ReadAsync<DashboardLuminaireRow>())
+            .Select(luminaire => new DeviceDashboardLuminaireDto(
+                luminaire.LuminaireId,
+                luminaire.Name,
+                luminaire.ZoneName,
+                luminaire.BrightnessPercentage,
+                ToUtc(luminaire.UpdatedAtUtc)))
+            .ToList();
+
+        var sensorEvents = (await results.ReadAsync<DashboardSensorEventRow>())
+            .Select(sensorEvent => new DeviceDashboardSensorEventDto(
+                sensorEvent.EventIdentifier,
+                sensorEvent.SensorId,
+                sensorEvent.SensorName,
+                sensorEvent.ZoneName,
+                DateTime.SpecifyKind(sensorEvent.OccurredAtUtc, DateTimeKind.Utc)))
+            .ToList();
+
+        return new DeviceDashboardDto(
+            device.Id,
+            device.Name,
+            ToUtc(device.LastTelemetryAtUtc),
+            luminaires,
+            sensorEvents);
     }
 
     public async Task<DeviceTopologyDto?> GetTopologyByIdAsync(
@@ -273,6 +348,24 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
     {
         public Guid EventIdentifier { get; init; }
         public Guid SensorId { get; init; }
+        public DateTime OccurredAtUtc { get; init; }
+    }
+
+    private sealed class DashboardLuminaireRow
+    {
+        public Guid LuminaireId { get; init; }
+        public string Name { get; init; } = string.Empty;
+        public string ZoneName { get; init; } = string.Empty;
+        public int? BrightnessPercentage { get; init; }
+        public DateTime? UpdatedAtUtc { get; init; }
+    }
+
+    private sealed class DashboardSensorEventRow
+    {
+        public Guid EventIdentifier { get; init; }
+        public Guid SensorId { get; init; }
+        public string SensorName { get; init; } = string.Empty;
+        public string ZoneName { get; init; } = string.Empty;
         public DateTime OccurredAtUtc { get; init; }
     }
 }

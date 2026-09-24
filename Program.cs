@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartLighting.Api.Application.Abstractions.Queries;
 using SmartLighting.Api.Application.Abstractions.Repositories;
 using SmartLighting.Api.Application.Features.Devices.GetDevices;
+using SmartLighting.Api.Application.Features.Devices.GetDeviceDashboard;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceLuminaireStates;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceTelemetryStatus;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceTopology;
@@ -24,6 +25,7 @@ builder.Services.AddDbContext<SmartLightingDbContext>(options =>
 builder.Services.AddScoped<IDeviceQueryRepository, DeviceQueryRepository>();
 builder.Services.AddScoped<ITelemetryRepository, TelemetryRepository>();
 builder.Services.AddScoped<GetDevicesProcessor>();
+builder.Services.AddScoped<GetDeviceDashboardProcessor>();
 builder.Services.AddScoped<GetDeviceLuminaireStatesProcessor>();
 builder.Services.AddScoped<GetDeviceTelemetryStatusProcessor>();
 builder.Services.AddScoped<GetDeviceTopologyProcessor>();
