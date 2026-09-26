@@ -37,6 +37,14 @@ builder.Services.SwaggerDocument();
 
 var app = builder.Build();
 
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+app.UseDefaultExceptionHandler(
+    logger,
+    logStructuredException: true,
+    useGenericReason: true,
+    useProblemDetails: true);
+
 app.UseHttpsRedirection();
 
 app.UseFastEndpoints()
