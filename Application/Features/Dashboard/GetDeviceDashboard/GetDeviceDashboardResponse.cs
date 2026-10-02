@@ -1,11 +1,11 @@
-namespace SmartLighting.Api.Application.Features.Dashboard.GetDashboard;
+namespace SmartLighting.Api.Application.Features.Dashboard.GetDeviceDashboard;
 
-public sealed record GetDashboardResponse(
+public sealed record GetDeviceDashboardResponse(
     Guid DeviceId,
     string Name,
     DateTime? LastTelemetryAtUtc,
-    IReadOnlyCollection<GetDashboardResponse.LuminaireResponse> Luminaires,
-    IReadOnlyCollection<GetDashboardResponse.SensorEventResponse> RecentSensorEvents)
+    IReadOnlyCollection<GetDeviceDashboardResponse.LuminaireResponse> Luminaires,
+    IReadOnlyCollection<GetDeviceDashboardResponse.SensorEventResponse> RecentSensorEvents)
 {
     public sealed record LuminaireResponse(
         Guid LuminaireId,

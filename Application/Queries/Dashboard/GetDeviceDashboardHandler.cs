@@ -1,17 +1,17 @@
 using FastEndpoints;
 using SmartLighting.Api.Application.Abstractions.Queries.Dashboard;
-using SmartLighting.Api.Application.Features.Dashboard.GetDashboard;
+using SmartLighting.Api.Application.Features.Dashboard.GetDeviceDashboard;
 
 namespace SmartLighting.Api.Application.Queries.Dashboard;
 
-public sealed class GetDashboardHandler(IDashboardQueryRepository dashboardQueryRepository)
-    : ICommandHandler<GetDashboardQuery, GetDashboardResponse?>
+public sealed class GetDeviceDashboardHandler(IDeviceDashboardQueryRepository dashboardQueryRepository)
+    : ICommandHandler<GetDeviceDashboardQuery, GetDeviceDashboardResponse?>
 {
-    public async Task<GetDashboardResponse?> ExecuteAsync(
-        GetDashboardQuery query,
+    public async Task<GetDeviceDashboardResponse?> ExecuteAsync(
+        GetDeviceDashboardQuery query,
         CancellationToken ct)
     {
-        var dashboard = await dashboardQueryRepository.GetDashboardByIdAsync(query.DeviceId, ct);
+        var dashboard = await dashboardQueryRepository.GetDeviceDashboardByIdAsync(query.DeviceId, ct);
 
         if (dashboard is null)
         {
@@ -19,7 +19,7 @@ public sealed class GetDashboardHandler(IDashboardQueryRepository dashboardQuery
         }
 
         var luminaires = dashboard.Luminaires
-            .Select(luminaire => new GetDashboardResponse.LuminaireResponse(
+            .Select(luminaire => new GetDeviceDashboardResponse.LuminaireResponse(
                 luminaire.LuminaireId,
                 luminaire.Name,
                 luminaire.ZoneName,
@@ -28,7 +28,7 @@ public sealed class GetDashboardHandler(IDashboardQueryRepository dashboardQuery
             .ToList();
 
         var sensorEvents = dashboard.RecentSensorEvents
-            .Select(sensorEvent => new GetDashboardResponse.SensorEventResponse(
+            .Select(sensorEvent => new GetDeviceDashboardResponse.SensorEventResponse(
                 sensorEvent.EventIdentifier,
                 sensorEvent.SensorId,
                 sensorEvent.SensorName,
@@ -36,7 +36,7 @@ public sealed class GetDashboardHandler(IDashboardQueryRepository dashboardQuery
                 sensorEvent.OccurredAtUtc))
             .ToList();
 
-        return new GetDashboardResponse(
+        return new GetDeviceDashboardResponse(
             dashboard.DeviceId,
             dashboard.Name,
             dashboard.LastTelemetryAtUtc,

@@ -5,7 +5,7 @@ using SmartLighting.Api.Application.ReadModels.Dashboard;
 
 namespace SmartLighting.Api.Infrastructure.Queries.Dashboard;
 
-public sealed class DashboardQueryRepository(IConfiguration configuration) : IDashboardQueryRepository
+public sealed class DeviceDashboardQueryRepository(IConfiguration configuration) : IDeviceDashboardQueryRepository
 {
     private const string DashboardSql = """
         SELECT d.Id, d.Name, d.LastTelemetryAtUtc
@@ -38,7 +38,7 @@ public sealed class DashboardQueryRepository(IConfiguration configuration) : IDa
     private readonly string _connectionString = configuration.GetConnectionString("SmartLightingDatabase")
         ?? throw new InvalidOperationException("A connection string 'SmartLightingDatabase' não foi configurada.");
 
-    public async Task<DeviceDashboardDto?> GetDashboardByIdAsync(
+    public async Task<DeviceDashboardDto?> GetDeviceDashboardByIdAsync(
         Guid deviceId,
         CancellationToken ct)
     {

@@ -1,10 +1,10 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
-namespace SmartLighting.Api.Application.Features.Dashboard.GetDashboard;
+namespace SmartLighting.Api.Application.Features.Dashboard.GetDeviceDashboard;
 
-public sealed class GetDashboardEndpoint(GetDashboardProcessor processor)
-    : Endpoint<GetDashboardRequest, GetDashboardResponse>
+public sealed class GetDeviceDashboardEndpoint(GetDeviceDashboardProcessor processor)
+    : Endpoint<GetDeviceDashboardRequest, GetDeviceDashboardResponse>
 {
     public override void Configure()
     {
@@ -20,7 +20,7 @@ public sealed class GetDashboardEndpoint(GetDashboardProcessor processor)
         });
     }
 
-    public override async Task HandleAsync(GetDashboardRequest req, CancellationToken ct)
+    public override async Task HandleAsync(GetDeviceDashboardRequest req, CancellationToken ct)
     {
         var response = await processor.HandleAsync(req, ct);
 

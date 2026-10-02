@@ -1,0 +1,36 @@
+namespace SmartLighting.Api.Application.ReadModels.Dashboard;
+
+public sealed record ProjectDashboardDto(
+    Guid ProjectId,
+    string Name,
+    IReadOnlyCollection<ProjectDashboardDeviceDto> Devices,
+    IReadOnlyCollection<ProjectDashboardZoneDto> Zones,
+    IReadOnlyCollection<ProjectDashboardSensorEventDto> RecentSensorEvents);
+
+public sealed record ProjectDashboardDeviceDto(Guid DeviceId, string Name, DateTime? LastTelemetryAtUtc);
+
+public sealed record ProjectDashboardZoneDto(
+    Guid ZoneId,
+    string Name,
+    int DisplayOrder,
+    IReadOnlyCollection<ProjectDashboardSensorDto> Sensors,
+    IReadOnlyCollection<ProjectDashboardLuminaireDto> Luminaires);
+
+public sealed record ProjectDashboardSensorDto(Guid SensorId, Guid DeviceId, string Name);
+
+public sealed record ProjectDashboardLuminaireDto(
+    Guid LuminaireId,
+    Guid DeviceId,
+    string Name,
+    decimal NominalPowerWatts,
+    int? BrightnessPercentage,
+    DateTime? UpdatedAtUtc);
+
+public sealed record ProjectDashboardSensorEventDto(
+    Guid EventIdentifier,
+    Guid SensorId,
+    Guid DeviceId,
+    string SensorName,
+    Guid ZoneId,
+    string ZoneName,
+    DateTime OccurredAtUtc);
