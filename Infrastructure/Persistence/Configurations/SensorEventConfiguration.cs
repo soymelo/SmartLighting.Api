@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SmartLighting.Api.Domain.Entities;
 
@@ -12,9 +13,17 @@ public sealed class SensorEventConfiguration : IEntityTypeConfiguration<SensorEv
 
         builder.HasKey(sensorEvent => sensorEvent.Id);
 
+        builder.Property(sensorEvent => sensorEvent.DeviceId)
+            .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw);
+
         builder.HasIndex(sensorEvent => sensorEvent.EventIdentifier)
             .IsUnique();
 
         builder.HasIndex(sensorEvent => new { sensorEvent.SensorId, sensorEvent.OccurredAtUtc });
+
+        builder.HasOne(sensorEvent => sensorEvent.Device)
+            .WithMany(device => device.SensorEvents)
+            .HasForeignKey(sensorEvent => sensorEvent.DeviceId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

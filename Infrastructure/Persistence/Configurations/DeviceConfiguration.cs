@@ -15,10 +15,5 @@ public sealed class DeviceConfiguration : IEntityTypeConfiguration<Device>
         builder.Property(device => device.Name)
             .HasMaxLength(50)
             .IsRequired();
-
-        builder.HasMany(device => device.Zones)
-            .WithOne(zone => zone.Device)
-            .HasForeignKey(zone => zone.DeviceId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

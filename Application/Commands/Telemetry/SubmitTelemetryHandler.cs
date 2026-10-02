@@ -17,8 +17,8 @@ public sealed class SubmitTelemetryHandler(ITelemetryRepository telemetryReposit
             return null;
         }
 
-        var sensorEvents = await CreateNewSensorEventsAsync(command.SensorEvents, ct);
-        var stateChanges = await CreateNewLuminaireStateChangesAsync(command.LuminaireStateChanges, ct);
+        var sensorEvents = await CreateNewSensorEventsAsync(command.DeviceId, command.SensorEvents, ct);
+        var stateChanges = await CreateNewLuminaireStateChangesAsync(command.DeviceId, command.LuminaireStateChanges, ct);
         var luminaireStatesUpdated = await UpdateLuminaireStatesAsync(stateChanges, ct);
         var receivedAtUtc = DateTime.UtcNow;
 
@@ -57,6 +57,7 @@ public sealed class SubmitTelemetryHandler(ITelemetryRepository telemetryReposit
     }
 
     private async Task<List<SensorEvent>> CreateNewSensorEventsAsync(
+        Guid deviceId,
         IReadOnlyCollection<SubmitTelemetryRequest.SensorEventItem> sensorEvents,
         CancellationToken ct)
     {
@@ -73,12 +74,14 @@ public sealed class SubmitTelemetryHandler(ITelemetryRepository telemetryReposit
             {
                 EventIdentifier = sensorEvent.EventIdentifier,
                 SensorId = sensorEvent.SensorId,
+                DeviceId = deviceId,
                 OccurredAtUtc = sensorEvent.OccurredAtUtc
             })
             .ToList();
     }
 
     private async Task<List<LuminaireStateChange>> CreateNewLuminaireStateChangesAsync(
+        Guid deviceId,
         IReadOnlyCollection<SubmitTelemetryRequest.LuminaireStateChangeItem> stateChanges,
         CancellationToken ct)
     {
@@ -95,6 +98,7 @@ public sealed class SubmitTelemetryHandler(ITelemetryRepository telemetryReposit
             {
                 EventIdentifier = stateChange.EventIdentifier,
                 LuminaireId = stateChange.LuminaireId,
+                DeviceId = deviceId,
                 BrightnessPercentage = stateChange.BrightnessPercentage,
                 ChangedAtUtc = stateChange.ChangedAtUtc
             })

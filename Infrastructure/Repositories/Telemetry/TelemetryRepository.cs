@@ -23,7 +23,7 @@ public sealed class TelemetryRepository(SmartLightingDbContext dbContext) : ITel
         }
 
         var sensorsInDeviceCount = await dbContext.Sensors.CountAsync(
-            sensor => distinctSensorIds.Contains(sensor.Id) && sensor.Zone.DeviceId == deviceId,
+            sensor => distinctSensorIds.Contains(sensor.Id) && sensor.DeviceId == deviceId,
             ct);
 
         return sensorsInDeviceCount == distinctSensorIds.Count;
@@ -42,7 +42,7 @@ public sealed class TelemetryRepository(SmartLightingDbContext dbContext) : ITel
         }
 
         var luminairesInDeviceCount = await dbContext.Luminaires.CountAsync(
-            luminaire => distinctLuminaireIds.Contains(luminaire.Id) && luminaire.Zone.DeviceId == deviceId,
+            luminaire => distinctLuminaireIds.Contains(luminaire.Id) && luminaire.DeviceId == deviceId,
             ct);
 
         return luminairesInDeviceCount == distinctLuminaireIds.Count;

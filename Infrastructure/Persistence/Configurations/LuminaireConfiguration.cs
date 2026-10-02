@@ -20,6 +20,11 @@ public sealed class LuminaireConfiguration : IEntityTypeConfiguration<Luminaire>
         builder.Property(luminaire => luminaire.NominalPowerWatts)
             .HasPrecision(10, 2);
 
+        builder.HasOne(luminaire => luminaire.Device)
+            .WithMany(device => device.Luminaires)
+            .HasForeignKey(luminaire => luminaire.DeviceId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasMany(luminaire => luminaire.StateChanges)
             .WithOne(stateChange => stateChange.Luminaire)
             .HasForeignKey(stateChange => stateChange.LuminaireId)

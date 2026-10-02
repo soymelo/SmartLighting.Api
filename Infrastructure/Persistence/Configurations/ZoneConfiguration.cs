@@ -16,7 +16,7 @@ public sealed class ZoneConfiguration : IEntityTypeConfiguration<Zone>
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.HasIndex(zone => new { zone.DeviceId, zone.DisplayOrder })
+        builder.HasIndex(zone => new { zone.ProjectId, zone.DisplayOrder })
             .IsUnique();
 
         builder.HasMany(zone => zone.Luminaires)

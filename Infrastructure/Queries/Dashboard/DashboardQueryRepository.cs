@@ -20,7 +20,7 @@ public sealed class DashboardQueryRepository(IConfiguration configuration) : IDa
         FROM Luminaires AS l
         INNER JOIN Zones AS z ON z.Id = l.ZoneId
         LEFT JOIN LuminaireStates AS ls ON ls.LuminaireId = l.Id
-        WHERE z.DeviceId = @DeviceId
+        WHERE l.DeviceId = @DeviceId
         ORDER BY z.DisplayOrder, l.Name, l.Id;
 
         SELECT TOP (50) se.EventIdentifier,
@@ -31,7 +31,7 @@ public sealed class DashboardQueryRepository(IConfiguration configuration) : IDa
         FROM SensorEvents AS se
         INNER JOIN Sensors AS s ON s.Id = se.SensorId
         INNER JOIN Zones AS z ON z.Id = s.ZoneId
-        WHERE z.DeviceId = @DeviceId
+        WHERE se.DeviceId = @DeviceId
         ORDER BY se.OccurredAtUtc DESC, se.EventIdentifier DESC;
         """;
 

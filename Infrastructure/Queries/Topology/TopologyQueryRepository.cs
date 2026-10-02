@@ -14,19 +14,18 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
 
         SELECT z.Id, z.Name, z.DisplayOrder
         FROM Zones AS z
-        WHERE z.DeviceId = @DeviceId
-        ORDER BY z.DisplayOrder;
+        WHERE EXISTS (SELECT 1 FROM Sensors AS s WHERE s.ZoneId = z.Id AND s.DeviceId = @DeviceId)
+           OR EXISTS (SELECT 1 FROM Luminaires AS l WHERE l.ZoneId = z.Id AND l.DeviceId = @DeviceId)
+        ORDER BY z.DisplayOrder, z.Id;
 
         SELECT s.Id, s.ZoneId, s.Name
         FROM Sensors AS s
-        INNER JOIN Zones AS z ON z.Id = s.ZoneId
-        WHERE z.DeviceId = @DeviceId
+        WHERE s.DeviceId = @DeviceId
         ORDER BY s.ZoneId, s.Name;
 
         SELECT l.Id, l.ZoneId, l.Name, l.NominalPowerWatts
         FROM Luminaires AS l
-        INNER JOIN Zones AS z ON z.Id = l.ZoneId
-        WHERE z.DeviceId = @DeviceId
+        WHERE l.DeviceId = @DeviceId
         ORDER BY l.ZoneId, l.Name;
         """;
 

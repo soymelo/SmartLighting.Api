@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SmartLighting.Api.Domain.Entities;
 
@@ -15,9 +16,17 @@ public sealed class LuminaireStateChangeConfiguration : IEntityTypeConfiguration
 
         builder.HasKey(stateChange => stateChange.Id);
 
+        builder.Property(stateChange => stateChange.DeviceId)
+            .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Throw);
+
         builder.HasIndex(stateChange => stateChange.EventIdentifier)
             .IsUnique();
 
         builder.HasIndex(stateChange => new { stateChange.LuminaireId, stateChange.ChangedAtUtc });
+
+        builder.HasOne(stateChange => stateChange.Device)
+            .WithMany(device => device.LuminaireStateChanges)
+            .HasForeignKey(stateChange => stateChange.DeviceId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

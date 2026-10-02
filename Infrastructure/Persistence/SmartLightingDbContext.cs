@@ -5,6 +5,7 @@ namespace SmartLighting.Api.Infrastructure.Persistence;
 
 public sealed class SmartLightingDbContext(DbContextOptions<SmartLightingDbContext> options) : DbContext(options)
 {
+    public DbSet<Project> Projects => Set<Project>();
     public DbSet<Device> Devices => Set<Device>();
     public DbSet<Zone> Zones => Set<Zone>();
     public DbSet<Luminaire> Luminaires => Set<Luminaire>();
