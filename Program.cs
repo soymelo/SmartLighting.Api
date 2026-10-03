@@ -4,23 +4,18 @@ using Microsoft.EntityFrameworkCore;
 using SmartLighting.Api.Application.Abstractions.Queries.Dashboard;
 using SmartLighting.Api.Application.Abstractions.Queries.Devices;
 using SmartLighting.Api.Application.Abstractions.Queries.Projects;
-using SmartLighting.Api.Application.Abstractions.Queries.Telemetry;
 using SmartLighting.Api.Application.Abstractions.Queries.Topology;
 using SmartLighting.Api.Application.Abstractions.Repositories.Telemetry;
-using SmartLighting.Api.Application.Features.Dashboard.GetDeviceDashboard;
 using SmartLighting.Api.Application.Features.Dashboard.GetProjectDashboard;
 using SmartLighting.Api.Application.Features.Devices.GetDevices;
+using SmartLighting.Api.Application.Features.Devices.GetDeviceById;
 using SmartLighting.Api.Application.Features.Projects.GetProjects;
-using SmartLighting.Api.Application.Features.Telemetry.GetLuminaireStates;
-using SmartLighting.Api.Application.Features.Telemetry.GetRecentSensorEvents;
-using SmartLighting.Api.Application.Features.Telemetry.GetTelemetryStatus;
 using SmartLighting.Api.Application.Features.Telemetry.SubmitTelemetry;
 using SmartLighting.Api.Application.Features.Topology.GetTopology;
 using SmartLighting.Api.Infrastructure.Persistence;
 using SmartLighting.Api.Infrastructure.Queries.Dashboard;
 using SmartLighting.Api.Infrastructure.Queries.Devices;
 using SmartLighting.Api.Infrastructure.Queries.Projects;
-using SmartLighting.Api.Infrastructure.Queries.Telemetry;
 using SmartLighting.Api.Infrastructure.Queries.Topology;
 using SmartLighting.Api.Infrastructure.Repositories.Telemetry;
 
@@ -34,19 +29,14 @@ builder.Services.AddDbContext<SmartLightingDbContext>(options =>
 
 builder.Services.AddScoped<IDeviceQueryRepository, DeviceQueryRepository>();
 builder.Services.AddScoped<IProjectQueryRepository, ProjectQueryRepository>();
-builder.Services.AddScoped<IDeviceDashboardQueryRepository, DeviceDashboardQueryRepository>();
 builder.Services.AddScoped<IProjectDashboardQueryRepository, ProjectDashboardQueryRepository>();
 builder.Services.AddScoped<ITopologyQueryRepository, TopologyQueryRepository>();
-builder.Services.AddScoped<ITelemetryQueryRepository, TelemetryQueryRepository>();
 builder.Services.AddScoped<ITelemetryRepository, TelemetryRepository>();
 builder.Services.AddScoped<GetDevicesProcessor>();
+builder.Services.AddScoped<GetDeviceByIdProcessor>();
 builder.Services.AddScoped<GetProjectsProcessor>();
-builder.Services.AddScoped<GetDeviceDashboardProcessor>();
 builder.Services.AddScoped<GetProjectDashboardProcessor>();
-builder.Services.AddScoped<GetLuminaireStatesProcessor>();
-builder.Services.AddScoped<GetTelemetryStatusProcessor>();
 builder.Services.AddScoped<GetTopologyProcessor>();
-builder.Services.AddScoped<GetRecentSensorEventsProcessor>();
 builder.Services.AddScoped<SubmitTelemetryProcessor>();
 
 builder.Services.AddFastEndpoints();

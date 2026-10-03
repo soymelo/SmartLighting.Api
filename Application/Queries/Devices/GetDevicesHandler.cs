@@ -14,6 +14,8 @@ public sealed class GetDevicesHandler(IDeviceQueryRepository deviceQueryReposito
             .Select(device => new GetDevicesResponse.DeviceResponse(
                 device.DeviceId,
                 device.Name,
+                device.ProjectId,
+                device.ProjectName,
                 device.LastTelemetryAtUtc)).ToList();
 
         return new GetDevicesResponse(responses);

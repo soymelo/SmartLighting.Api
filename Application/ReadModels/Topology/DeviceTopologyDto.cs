@@ -3,6 +3,9 @@ namespace SmartLighting.Api.Application.ReadModels.Topology;
 public sealed record DeviceTopologyDto(
     Guid DeviceId,
     string Name,
+    Guid ProjectId,
+    string ProjectName,
+    DateTime? LastTelemetryAtUtc,
     IReadOnlyCollection<DeviceTopologyZoneDto> Zones);
 
 public sealed record DeviceTopologyZoneDto(

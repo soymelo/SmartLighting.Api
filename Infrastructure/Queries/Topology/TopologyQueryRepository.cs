@@ -8,8 +8,9 @@ namespace SmartLighting.Api.Infrastructure.Queries.Topology;
 public sealed class TopologyQueryRepository(IConfiguration configuration) : ITopologyQueryRepository
 {
     private const string TopologySql = """
-        SELECT d.Id, d.Name
+        SELECT d.Id, d.Name, d.ProjectId, p.Name AS ProjectName, d.LastTelemetryAtUtc
         FROM Devices AS d
+        INNER JOIN Projects AS p ON p.Id = d.ProjectId
         WHERE d.Id = @DeviceId;
 
         SELECT z.Id, z.Name, z.DisplayOrder
@@ -81,13 +82,23 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
                 luminairesByZone.GetValueOrDefault(zone.Id, Array.Empty<DeviceTopologyLuminaireDto>())))
             .ToList();
 
-        return new DeviceTopologyDto(device.Id, device.Name, zoneDtos);
+        return new DeviceTopologyDto(
+            device.Id,
+            device.Name,
+            device.ProjectId,
+            device.ProjectName,
+            device.LastTelemetryAtUtc is null
+                ? null
+                : DateTime.SpecifyKind(device.LastTelemetryAtUtc.Value, DateTimeKind.Utc),
+            zoneDtos);
     }
 
     private sealed class DeviceRow
     {
         public Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
+        public Guid ProjectId { get; init; }
+        public string ProjectName { get; init; } = string.Empty;
         public DateTime? LastTelemetryAtUtc { get; init; }
     }
 

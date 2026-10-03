@@ -1,5 +1,6 @@
 @SmartLighting.Api_HostAddress = http://localhost:5282
 @DeviceId = A0000000-0000-0000-0000-000000000001
+@ProjectId = B0000000-0000-0000-0000-000000000001
 
 GET {{SmartLighting.Api_HostAddress}}/ping
 Accept: application/json
@@ -11,22 +12,33 @@ Accept: application/json
 
 ###
 
+GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}
+Accept: application/json
+
+###
+
 GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/topology
 Accept: application/json
 
 ###
 
-GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry/status
+GET {{SmartLighting.Api_HostAddress}}/projects
 Accept: application/json
 
 ###
 
-GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry/luminaire-states
+GET {{SmartLighting.Api_HostAddress}}/projects/{{ProjectId}}/dashboard
 Accept: application/json
 
 ###
 
-GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry/sensor-events?limit=50
-Accept: application/json
+POST {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/telemetry
+Content-Type: application/json
+
+{
+  "sentAtUtc": "2026-10-03T12:00:00Z",
+  "sensorEvents": [],
+  "luminaireStateChanges": []
+}
 
 ###

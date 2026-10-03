@@ -5,5 +5,7 @@ public sealed record GetDevicesResponse(IReadOnlyCollection<GetDevicesResponse.D
     public sealed record DeviceResponse(
         Guid DeviceId,
         string Name,
+        Guid ProjectId,
+        string ProjectName,
         DateTime? LastTelemetryAtUtc);
 }

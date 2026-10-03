@@ -8,8 +8,9 @@ namespace SmartLighting.Api.Infrastructure.Queries.Devices;
 public sealed class DeviceQueryRepository(IConfiguration configuration) : IDeviceQueryRepository
 {
     private const string DevicesSql = """
-        SELECT d.Id, d.Name, d.LastTelemetryAtUtc
+        SELECT d.Id, d.Name, d.ProjectId, p.Name AS ProjectName, d.LastTelemetryAtUtc
         FROM Devices AS d
+        INNER JOIN Projects AS p ON p.Id = d.ProjectId
         ORDER BY d.Name, d.Id;
         """;
 
@@ -28,6 +29,8 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
             .Select(device => new DeviceSummaryDto(
                 device.Id,
                 device.Name,
+                device.ProjectId,
+                device.ProjectName,
                 ToUtc(device.LastTelemetryAtUtc)))
             .ToList();
     }
@@ -40,6 +43,8 @@ public sealed class DeviceQueryRepository(IConfiguration configuration) : IDevic
     {
         public Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
+        public Guid ProjectId { get; init; }
+        public string ProjectName { get; init; } = string.Empty;
         public DateTime? LastTelemetryAtUtc { get; init; }
     }
 }
