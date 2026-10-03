@@ -2,6 +2,7 @@ using Dapper;
 using Microsoft.Data.SqlClient;
 using SmartLighting.Api.Application.Abstractions.Queries.Topology;
 using SmartLighting.Api.Application.ReadModels.Topology;
+using SmartLighting.Api.Domain.Hardware;
 
 namespace SmartLighting.Api.Infrastructure.Queries.Topology;
 
@@ -19,15 +20,15 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
            OR EXISTS (SELECT 1 FROM Luminaires AS l WHERE l.ZoneId = z.Id AND l.DeviceId = @DeviceId)
         ORDER BY z.DisplayOrder, z.Id;
 
-        SELECT s.Id, s.ZoneId, s.Name
+        SELECT s.Id, s.ZoneId, s.Name, s.Slot
         FROM Sensors AS s
         WHERE s.DeviceId = @DeviceId
-        ORDER BY s.ZoneId, s.Name;
+        ORDER BY s.ZoneId, s.Slot;
 
-        SELECT l.Id, l.ZoneId, l.Name, l.NominalPowerWatts
+        SELECT l.Id, l.ZoneId, l.Name, l.NominalPowerWatts, l.Slot
         FROM Luminaires AS l
         WHERE l.DeviceId = @DeviceId
-        ORDER BY l.ZoneId, l.Name;
+        ORDER BY l.ZoneId, l.Slot;
         """;
 
     private readonly string _connectionString = configuration.GetConnectionString("SmartLightingDatabase")
@@ -60,7 +61,11 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
             .ToDictionary(
                 group => group.Key,
                 group => (IReadOnlyCollection<DeviceTopologySensorDto>)group
-                    .Select(sensor => new DeviceTopologySensorDto(sensor.Id, sensor.Name))
+                    .Select(sensor => new DeviceTopologySensorDto(
+                        sensor.Id,
+                        sensor.Name,
+                        sensor.Slot,
+                        Esp32Pinout.GetGpio(sensor.Slot)))
                     .ToList());
         var luminairesByZone = (await results.ReadAsync<LuminaireRow>())
             .GroupBy(luminaire => luminaire.ZoneId)
@@ -70,7 +75,9 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
                     .Select(luminaire => new DeviceTopologyLuminaireDto(
                         luminaire.Id,
                         luminaire.Name,
-                        luminaire.NominalPowerWatts))
+                        luminaire.NominalPowerWatts,
+                        luminaire.Slot,
+                        Esp32Pinout.GetGpio(luminaire.Slot)))
                     .ToList());
 
         var zoneDtos = zones
@@ -114,6 +121,7 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
         public Guid Id { get; init; }
         public Guid ZoneId { get; init; }
         public string Name { get; init; } = string.Empty;
+        public SensorSlot Slot { get; init; }
     }
 
     private sealed class LuminaireRow
@@ -122,5 +130,6 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
         public Guid ZoneId { get; init; }
         public string Name { get; init; } = string.Empty;
         public decimal NominalPowerWatts { get; init; }
+        public LuminaireSlot Slot { get; init; }
     }
 }

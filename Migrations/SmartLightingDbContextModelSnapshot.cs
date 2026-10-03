@@ -64,18 +64,24 @@ namespace SmartLighting.Api.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<int>("Slot")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("ZoneId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeviceId");
-
                     b.HasIndex("ZoneId");
+
+                    b.HasIndex("DeviceId", "Slot")
+                        .IsUnique();
 
                     b.ToTable("Luminaires", null, t =>
                         {
                             t.HasCheckConstraint("CK_Luminaires_NominalPowerWatts", "[NominalPowerWatts] > 0");
+
+                            t.HasCheckConstraint("CK_Luminaires_Slot", "[Slot] IN (1, 2, 3, 4, 5, 6)");
                         });
                 });
 
@@ -164,16 +170,23 @@ namespace SmartLighting.Api.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("Slot")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("ZoneId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeviceId");
-
                     b.HasIndex("ZoneId");
 
-                    b.ToTable("Sensors", (string)null);
+                    b.HasIndex("DeviceId", "Slot")
+                        .IsUnique();
+
+                    b.ToTable("Sensors", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Sensors_Slot", "[Slot] IN (1, 2, 3)");
+                        });
                 });
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.SensorEvent", b =>

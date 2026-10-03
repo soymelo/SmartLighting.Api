@@ -15,7 +15,16 @@ public sealed record GetDeviceByIdResponse(
         IReadOnlyCollection<SensorResponse> Sensors,
         IReadOnlyCollection<LuminaireResponse> Luminaires);
 
-    public sealed record SensorResponse(Guid SensorId, string Name);
+    public sealed record SensorResponse(
+        Guid SensorId,
+        string Name,
+        int Slot,
+        int GpioNumber);
 
-    public sealed record LuminaireResponse(Guid LuminaireId, string Name, decimal NominalPowerWatts);
+    public sealed record LuminaireResponse(
+        Guid LuminaireId,
+        string Name,
+        decimal NominalPowerWatts,
+        int Slot,
+        int GpioNumber);
 }

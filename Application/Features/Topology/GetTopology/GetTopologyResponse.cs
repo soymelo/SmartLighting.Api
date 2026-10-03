@@ -16,12 +16,18 @@ public sealed record GetTopologyResponse
         IReadOnlyCollection<LuminaireResponse> Luminaires
     );
 
-    public sealed record SensorResponse(Guid SensorId, string Name);
+    public sealed record SensorResponse(
+        Guid SensorId,
+        string Name,
+        int Slot,
+        int GpioNumber);
 
     public sealed record LuminaireResponse
     (
         Guid LuminaireId,
         string Name,
-        decimal NominalPowerWatts
+        decimal NominalPowerWatts,
+        int Slot,
+        int GpioNumber
     );
 }

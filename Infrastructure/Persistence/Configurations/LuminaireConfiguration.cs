@@ -9,13 +9,23 @@ public sealed class LuminaireConfiguration : IEntityTypeConfiguration<Luminaire>
     public void Configure(EntityTypeBuilder<Luminaire> builder)
     {
         builder.ToTable("Luminaires", table =>
-            table.HasCheckConstraint("CK_Luminaires_NominalPowerWatts", "[NominalPowerWatts] > 0"));
+        {
+            table.HasCheckConstraint("CK_Luminaires_NominalPowerWatts", "[NominalPowerWatts] > 0");
+            table.HasCheckConstraint("CK_Luminaires_Slot", "[Slot] IN (1, 2, 3, 4, 5, 6)");
+        });
 
         builder.HasKey(luminaire => luminaire.Id);
 
         builder.Property(luminaire => luminaire.Name)
             .HasMaxLength(50)
             .IsRequired();
+
+        builder.Property(luminaire => luminaire.Slot)
+            .HasConversion<int>()
+            .IsRequired();
+
+        builder.HasIndex(luminaire => new { luminaire.DeviceId, luminaire.Slot })
+            .IsUnique();
 
         builder.Property(luminaire => luminaire.NominalPowerWatts)
             .HasPrecision(10, 2);

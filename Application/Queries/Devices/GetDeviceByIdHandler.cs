@@ -4,8 +4,6 @@ using SmartLighting.Api.Application.Features.Devices.GetDeviceById;
 
 namespace SmartLighting.Api.Application.Queries.Devices;
 
-// TODO: Reavaliar o nome e o escopo de ITopologyQueryRepository.
-// Esta consulta também fornece o projeto e o último contato do dispositivo.
 public sealed class GetDeviceByIdHandler(ITopologyQueryRepository topologyQueryRepository)
     : ICommandHandler<GetDeviceByIdQuery, GetDeviceByIdResponse?>
 {
@@ -24,13 +22,19 @@ public sealed class GetDeviceByIdHandler(ITopologyQueryRepository topologyQueryR
                 zone.Name,
                 zone.DisplayOrder,
                 zone.Sensors
-                    .Select(sensor => new GetDeviceByIdResponse.SensorResponse(sensor.SensorId, sensor.Name))
+                    .Select(sensor => new GetDeviceByIdResponse.SensorResponse(
+                        sensor.SensorId,
+                        sensor.Name,
+                        (int)sensor.Slot,
+                        sensor.GpioNumber))
                     .ToList(),
                 zone.Luminaires
                     .Select(luminaire => new GetDeviceByIdResponse.LuminaireResponse(
                         luminaire.LuminaireId,
                         luminaire.Name,
-                        luminaire.NominalPowerWatts))
+                        luminaire.NominalPowerWatts,
+                        (int)luminaire.Slot,
+                        luminaire.GpioNumber))
                     .ToList()))
             .ToList();
 

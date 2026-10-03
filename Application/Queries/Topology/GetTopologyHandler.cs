@@ -22,13 +22,19 @@ public sealed class GetTopologyHandler(ITopologyQueryRepository topologyQueryRep
                 zone.Name,
                 zone.DisplayOrder,
                 zone.Sensors
-                    .Select(sensor => new GetTopologyResponse.SensorResponse(sensor.SensorId, sensor.Name))
+                    .Select(sensor => new GetTopologyResponse.SensorResponse(
+                        sensor.SensorId,
+                        sensor.Name,
+                        (int)sensor.Slot,
+                        sensor.GpioNumber))
                     .ToList(),
                 zone.Luminaires
                     .Select(luminaire => new GetTopologyResponse.LuminaireResponse(
                         luminaire.LuminaireId,
                         luminaire.Name,
-                        luminaire.NominalPowerWatts))
+                        luminaire.NominalPowerWatts,
+                        (int)luminaire.Slot,
+                        luminaire.GpioNumber))
             .ToList()))
             .ToList();
 

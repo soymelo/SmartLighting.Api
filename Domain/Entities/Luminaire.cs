@@ -1,3 +1,5 @@
+using SmartLighting.Api.Domain.Hardware;
+
 namespace SmartLighting.Api.Domain.Entities;
 
 public sealed class Luminaire
@@ -6,6 +8,7 @@ public sealed class Luminaire
     public Guid ZoneId { get; set; }
     public Guid DeviceId { get; set; }
     public string Name { get; set; } = string.Empty;
+    public LuminaireSlot Slot { get; set; }
     public decimal NominalPowerWatts { get; set; }
 
     public Zone Zone { get; set; } = null!;

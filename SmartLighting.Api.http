@@ -1,6 +1,7 @@
 @SmartLighting.Api_HostAddress = http://localhost:5282
 @DeviceId = A0000000-0000-0000-0000-000000000001
 @ProjectId = B0000000-0000-0000-0000-000000000001
+@ZoneId = C0000000-0000-0000-0000-000000000001
 
 GET {{SmartLighting.Api_HostAddress}}/ping
 Accept: application/json
@@ -29,6 +30,30 @@ Accept: application/json
 
 GET {{SmartLighting.Api_HostAddress}}/projects/{{ProjectId}}/dashboard
 Accept: application/json
+
+###
+
+POST {{SmartLighting.Api_HostAddress}}/projects/{{ProjectId}}/devices
+Content-Type: application/json
+
+{
+  "name": "ESP32 1",
+  "sensors": [
+    {
+      "slot": 1,
+      "name": "Sensor 1",
+      "zoneId": "{{ZoneId}}"
+    }
+  ],
+  "luminaires": [
+    {
+      "slot": 1,
+      "name": "LED 1",
+      "zoneId": "{{ZoneId}}",
+      "nominalPowerWatts": 10
+    }
+  ]
+}
 
 ###
 
