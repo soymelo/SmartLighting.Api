@@ -7,6 +7,12 @@ namespace SmartLighting.Api.Infrastructure.Repositories.Devices;
 
 public sealed class DeviceRepository(SmartLightingDbContext dbContext) : IDeviceRepository
 {
+    public Task<Device?> GetByIdWithComponentsAsync(Guid deviceId, CancellationToken ct) =>
+        dbContext.Devices
+            .Include(device => device.Sensors)
+            .Include(device => device.Luminaires)
+            .SingleOrDefaultAsync(device => device.Id == deviceId, ct);
+
     public Task<bool> ProjectExistsAsync(Guid projectId, CancellationToken ct) =>
         dbContext.Projects.AnyAsync(project => project.Id == projectId, ct);
 

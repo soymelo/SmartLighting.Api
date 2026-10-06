@@ -18,6 +18,31 @@ Accept: application/json
 
 ###
 
+# Inclua todos os slots já cadastrados; omitir um deles retorna erro.
+PUT {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}
+Content-Type: application/json
+
+{
+  "name": "ESP32 1 atualizado",
+  "sensors": [
+    {
+      "slot": 1,
+      "name": "Sensor 1",
+      "zoneId": "{{ZoneId}}"
+    }
+  ],
+  "luminaires": [
+    {
+      "slot": 1,
+      "name": "LED 1",
+      "zoneId": "{{ZoneId}}",
+      "nominalPowerWatts": 10
+    }
+  ]
+}
+
+###
+
 GET {{SmartLighting.Api_HostAddress}}/devices/{{DeviceId}}/topology
 Accept: application/json
 
