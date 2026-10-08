@@ -19,11 +19,6 @@ public sealed class ZoneConfiguration : IEntityTypeConfiguration<Zone>
         builder.HasIndex(zone => new { zone.ProjectId, zone.DisplayOrder })
             .IsUnique();
 
-        builder.HasMany(zone => zone.Luminaires)
-            .WithOne(luminaire => luminaire.Zone)
-            .HasForeignKey(luminaire => luminaire.ZoneId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasMany(zone => zone.Sensors)
             .WithOne(sensor => sensor.Zone)
             .HasForeignKey(sensor => sensor.ZoneId)

@@ -16,7 +16,7 @@ public sealed class CreateDeviceHandler(IDeviceRepository deviceRepository) : IC
 
         var zoneIds = command.Sensors
             .Select(sensor => sensor.ZoneId)
-            .Concat(command.Luminaires.Select(luminaire => luminaire.ZoneId))
+            .Concat(command.Luminaires.SelectMany(luminaire => luminaire.ZoneIds))
             .Distinct()
             .ToList();
 
@@ -44,14 +44,24 @@ public sealed class CreateDeviceHandler(IDeviceRepository deviceRepository) : IC
 
         foreach (var luminaire in command.Luminaires)
         {
-            device.Luminaires.Add(new Luminaire
+            var entity = new Luminaire
             {
                 DeviceId = device.Id,
-                ZoneId = luminaire.ZoneId,
                 Name = luminaire.Name.Trim(),
                 Slot = luminaire.Slot,
                 NominalPowerWatts = luminaire.NominalPowerWatts
-            });
+            };
+
+            foreach (var zoneId in luminaire.ZoneIds)
+            {
+                entity.ZoneLuminaires.Add(new ZoneLuminaire
+                {
+                    ZoneId = zoneId,
+                    LuminaireId = entity.Id
+                });
+            }
+
+            device.Luminaires.Add(entity);
         }
 
         deviceRepository.Add(device);

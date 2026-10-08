@@ -16,7 +16,7 @@ public sealed class UpdateDeviceRequest
     public sealed record LuminaireItem(
         LuminaireSlot Slot,
         string Name,
-        Guid ZoneId,
+        IReadOnlyCollection<Guid> ZoneIds,
         decimal NominalPowerWatts);
 }
 
@@ -58,7 +58,12 @@ public sealed class UpdateDeviceValidator : Validator<UpdateDeviceRequest>
             luminaire.RuleFor(item => item.Slot).IsInEnum()
                 .WithMessage("O slot da luminária deve estar entre 1 e 6.");
             luminaire.RuleFor(item => item.Name).NotEmpty().MaximumLength(MaximumNameLength);
-            luminaire.RuleFor(item => item.ZoneId).NotEmpty();
+            luminaire.RuleFor(item => item.ZoneIds)
+                .NotNull()
+                .Must(zoneIds => zoneIds is { Count: > 0 } &&
+                                 zoneIds.All(zoneId => zoneId != Guid.Empty) &&
+                                 zoneIds.Distinct().Count() == zoneIds.Count)
+                .WithMessage("Informe zonas válidas e sem repetição para a luminária.");
             luminaire.RuleFor(item => item.NominalPowerWatts)
                 .GreaterThan(0)
                 .PrecisionScale(10, 2, false);

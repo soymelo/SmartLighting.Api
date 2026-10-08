@@ -11,6 +11,8 @@ public sealed class DeviceRepository(SmartLightingDbContext dbContext) : IDevice
         dbContext.Devices
             .Include(device => device.Sensors)
             .Include(device => device.Luminaires)
+                .ThenInclude(luminaire => luminaire.ZoneLuminaires)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(device => device.Id == deviceId, ct);
 
     public Task<bool> ProjectExistsAsync(Guid projectId, CancellationToken ct) =>

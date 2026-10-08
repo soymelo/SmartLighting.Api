@@ -67,12 +67,7 @@ namespace SmartLighting.Api.Migrations
                     b.Property<int>("Slot")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("ZoneId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ZoneId");
 
                     b.HasIndex("DeviceId", "Slot")
                         .IsUnique();
@@ -244,6 +239,21 @@ namespace SmartLighting.Api.Migrations
                     b.ToTable("Zones", (string)null);
                 });
 
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.ZoneLuminaire", b =>
+                {
+                    b.Property<Guid>("ZoneId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LuminaireId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ZoneId", "LuminaireId");
+
+                    b.HasIndex("LuminaireId");
+
+                    b.ToTable("ZoneLuminaires", (string)null);
+                });
+
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Device", b =>
                 {
                     b.HasOne("SmartLighting.Api.Domain.Entities.Project", "Project")
@@ -263,15 +273,7 @@ namespace SmartLighting.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SmartLighting.Api.Domain.Entities.Zone", "Zone")
-                        .WithMany("Luminaires")
-                        .HasForeignKey("ZoneId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Device");
-
-                    b.Navigation("Zone");
                 });
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.LuminaireState", b =>
@@ -353,6 +355,25 @@ namespace SmartLighting.Api.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("SmartLighting.Api.Domain.Entities.ZoneLuminaire", b =>
+                {
+                    b.HasOne("SmartLighting.Api.Domain.Entities.Luminaire", "Luminaire")
+                        .WithMany("ZoneLuminaires")
+                        .HasForeignKey("LuminaireId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartLighting.Api.Domain.Entities.Zone", "Zone")
+                        .WithMany("ZoneLuminaires")
+                        .HasForeignKey("ZoneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Luminaire");
+
+                    b.Navigation("Zone");
+                });
+
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Device", b =>
                 {
                     b.Navigation("LuminaireStateChanges");
@@ -369,6 +390,8 @@ namespace SmartLighting.Api.Migrations
                     b.Navigation("State");
 
                     b.Navigation("StateChanges");
+
+                    b.Navigation("ZoneLuminaires");
                 });
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Project", b =>
@@ -385,9 +408,9 @@ namespace SmartLighting.Api.Migrations
 
             modelBuilder.Entity("SmartLighting.Api.Domain.Entities.Zone", b =>
                 {
-                    b.Navigation("Luminaires");
-
                     b.Navigation("Sensors");
+
+                    b.Navigation("ZoneLuminaires");
                 });
 #pragma warning restore 612, 618
         }

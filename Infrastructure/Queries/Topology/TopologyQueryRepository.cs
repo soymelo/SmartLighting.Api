@@ -17,7 +17,11 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
         SELECT z.Id, z.Name, z.DisplayOrder
         FROM Zones AS z
         WHERE EXISTS (SELECT 1 FROM Sensors AS s WHERE s.ZoneId = z.Id AND s.DeviceId = @DeviceId)
-           OR EXISTS (SELECT 1 FROM Luminaires AS l WHERE l.ZoneId = z.Id AND l.DeviceId = @DeviceId)
+           OR EXISTS (
+               SELECT 1
+               FROM ZoneLuminaires AS zl
+               INNER JOIN Luminaires AS l ON l.Id = zl.LuminaireId
+               WHERE zl.ZoneId = z.Id AND l.DeviceId = @DeviceId)
         ORDER BY z.DisplayOrder, z.Id;
 
         SELECT s.Id, s.ZoneId, s.Name, s.Slot
@@ -25,10 +29,11 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
         WHERE s.DeviceId = @DeviceId
         ORDER BY s.ZoneId, s.Slot;
 
-        SELECT l.Id, l.ZoneId, l.Name, l.NominalPowerWatts, l.Slot
+        SELECT l.Id, zl.ZoneId, l.Name, l.NominalPowerWatts, l.Slot
         FROM Luminaires AS l
+        INNER JOIN ZoneLuminaires AS zl ON zl.LuminaireId = l.Id
         WHERE l.DeviceId = @DeviceId
-        ORDER BY l.ZoneId, l.Slot;
+        ORDER BY zl.ZoneId, l.Slot;
         """;
 
     private readonly string _connectionString = configuration.GetConnectionString("SmartLightingDatabase")

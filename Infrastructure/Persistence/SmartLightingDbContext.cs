@@ -8,6 +8,7 @@ public sealed class SmartLightingDbContext(DbContextOptions<SmartLightingDbConte
     public DbSet<Project> Projects => Set<Project>();
     public DbSet<Device> Devices => Set<Device>();
     public DbSet<Zone> Zones => Set<Zone>();
+    public DbSet<ZoneLuminaire> ZoneLuminaires => Set<ZoneLuminaire>();
     public DbSet<Luminaire> Luminaires => Set<Luminaire>();
     public DbSet<Sensor> Sensors => Set<Sensor>();
     public DbSet<SensorEvent> SensorEvents => Set<SensorEvent>();

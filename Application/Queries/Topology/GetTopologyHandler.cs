@@ -16,6 +16,14 @@ public sealed class GetTopologyHandler(ITopologyQueryRepository topologyQueryRep
             return null;
         }
 
+        var zoneIdsByLuminaire = device.Zones
+            .SelectMany(zone => zone.Luminaires.Select(luminaire => (zone.ZoneId, luminaire.LuminaireId)))
+            .GroupBy(item => item.LuminaireId)
+            .ToDictionary(group => group.Key, group => (IReadOnlyCollection<Guid>)group
+                .Select(item => item.ZoneId)
+                .ToArray());
+
+        // O firmware atual aceita cada slot físico uma única vez no contrato de topologia.
         var zones = device.Zones
             .Select(zone => new GetTopologyResponse.ZoneResponse(
                 zone.ZoneId,
@@ -29,12 +37,14 @@ public sealed class GetTopologyHandler(ITopologyQueryRepository topologyQueryRep
                         sensor.GpioNumber))
                     .ToList(),
                 zone.Luminaires
+                    .Where(luminaire => zoneIdsByLuminaire[luminaire.LuminaireId].First() == zone.ZoneId)
                     .Select(luminaire => new GetTopologyResponse.LuminaireResponse(
                         luminaire.LuminaireId,
                         luminaire.Name,
                         luminaire.NominalPowerWatts,
                         (int)luminaire.Slot,
-                        luminaire.GpioNumber))
+                        luminaire.GpioNumber,
+                        zoneIdsByLuminaire[luminaire.LuminaireId]))
             .ToList()))
             .ToList();
 

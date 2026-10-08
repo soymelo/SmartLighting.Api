@@ -8,6 +8,6 @@ public sealed class Zone
     public int DisplayOrder { get; set; }
 
     public Project Project { get; set; } = null!;
-    public ICollection<Luminaire> Luminaires { get; set; } = new List<Luminaire>();
+    public ICollection<ZoneLuminaire> ZoneLuminaires { get; set; } = new List<ZoneLuminaire>();
     public ICollection<Sensor> Sensors { get; set; } = new List<Sensor>();
 }

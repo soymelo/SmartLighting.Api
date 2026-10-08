@@ -28,7 +28,7 @@ public sealed class UpdateDeviceHandler(IDeviceRepository deviceRepository)
 
         var zoneIds = command.Sensors
             .Select(sensor => sensor.ZoneId)
-            .Concat(command.Luminaires.Select(luminaire => luminaire.ZoneId))
+            .Concat(command.Luminaires.SelectMany(luminaire => luminaire.ZoneIds))
             .Distinct()
             .ToList();
 
@@ -65,20 +65,40 @@ public sealed class UpdateDeviceHandler(IDeviceRepository deviceRepository)
 
             if (luminaire is null)
             {
-                device.Luminaires.Add(new Luminaire
+                luminaire = new Luminaire
                 {
                     DeviceId = device.Id,
                     Slot = item.Slot,
                     Name = item.Name.Trim(),
-                    ZoneId = item.ZoneId,
                     NominalPowerWatts = item.NominalPowerWatts
-                });
-                continue;
+                };
+                device.Luminaires.Add(luminaire);
+            }
+            else
+            {
+                luminaire.Name = item.Name.Trim();
+                luminaire.NominalPowerWatts = item.NominalPowerWatts;
             }
 
-            luminaire.Name = item.Name.Trim();
-            luminaire.ZoneId = item.ZoneId;
-            luminaire.NominalPowerWatts = item.NominalPowerWatts;
+            var requestedZoneIds = item.ZoneIds.ToHashSet();
+            foreach (var link in luminaire.ZoneLuminaires
+                         .Where(link => !requestedZoneIds.Contains(link.ZoneId))
+                         .ToList())
+            {
+                luminaire.ZoneLuminaires.Remove(link);
+            }
+
+            var existingZoneIds = luminaire.ZoneLuminaires
+                .Select(link => link.ZoneId)
+                .ToHashSet();
+            foreach (var zoneId in requestedZoneIds.Except(existingZoneIds))
+            {
+                luminaire.ZoneLuminaires.Add(new ZoneLuminaire
+                {
+                    ZoneId = zoneId,
+                    LuminaireId = luminaire.Id
+                });
+            }
         }
 
         await deviceRepository.SaveChangesAsync(ct);

@@ -30,14 +30,15 @@ public sealed class ProjectDashboardQueryRepository(IConfiguration configuration
         ORDER BY z.DisplayOrder, s.Name, s.Id;
 
         SELECT l.Id AS LuminaireId,
-               l.ZoneId,
+               zl.ZoneId,
                l.DeviceId,
                l.Name,
                l.NominalPowerWatts,
                ls.BrightnessPercentage,
                ls.UpdatedAtUtc
         FROM Luminaires AS l
-        INNER JOIN Zones AS z ON z.Id = l.ZoneId
+        INNER JOIN ZoneLuminaires AS zl ON zl.LuminaireId = l.Id
+        INNER JOIN Zones AS z ON z.Id = zl.ZoneId
         INNER JOIN Devices AS d ON d.Id = l.DeviceId
         LEFT JOIN LuminaireStates AS ls ON ls.LuminaireId = l.Id
         WHERE z.ProjectId = @ProjectId AND d.ProjectId = @ProjectId

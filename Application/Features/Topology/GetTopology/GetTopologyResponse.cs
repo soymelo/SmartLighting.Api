@@ -28,6 +28,7 @@ public sealed record GetTopologyResponse
         string Name,
         decimal NominalPowerWatts,
         int Slot,
-        int GpioNumber
+        int GpioNumber,
+        IReadOnlyCollection<Guid> ZoneIds
     );
 }
