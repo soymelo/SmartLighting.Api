@@ -57,6 +57,16 @@ public sealed class ProjectDashboardQueryRepository(IConfiguration configuration
         INNER JOIN Zones AS z ON z.Id = s.ZoneId
         WHERE d.ProjectId = @ProjectId
         ORDER BY se.OccurredAtUtc DESC, se.EventIdentifier DESC;
+
+        SELECT s.ZoneId, COUNT(*) AS EventCount
+        FROM SensorEvents AS se
+        INNER JOIN Sensors AS s ON s.Id = se.SensorId
+        INNER JOIN Devices AS d ON d.Id = se.DeviceId
+        WHERE d.ProjectId = @ProjectId
+          AND s.DeviceId = se.DeviceId
+          AND se.OccurredAtUtc >= @ActivitySinceUtc
+          AND se.OccurredAtUtc <= @ActivityUntilUtc
+        GROUP BY s.ZoneId;
         """;
 
     private readonly string _connectionString = configuration.GetConnectionString("SmartLightingDatabase")
@@ -69,9 +79,10 @@ public sealed class ProjectDashboardQueryRepository(IConfiguration configuration
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(ct);
 
+        var nowUtc = DateTime.UtcNow;
         var command = new CommandDefinition(
             DashboardSql,
-            new { ProjectId = projectId },
+            new { ProjectId = projectId, ActivitySinceUtc = nowUtc.AddHours(-24), ActivityUntilUtc = nowUtc },
             cancellationToken: ct);
 
         using var results = await connection.QueryMultipleAsync(command);
@@ -135,7 +146,11 @@ public sealed class ProjectDashboardQueryRepository(IConfiguration configuration
                 DateTime.SpecifyKind(sensorEvent.OccurredAtUtc, DateTimeKind.Utc)))
             .ToList();
 
-        return new ProjectDashboardDto(project.Id, project.Name, devices, zoneDtos, sensorEvents);
+        var activity = (await results.ReadAsync<ZoneActivityRow>())
+            .Select(row => new ProjectDashboardZoneActivityDto(row.ZoneId, row.EventCount))
+            .ToList();
+
+        return new ProjectDashboardDto(project.Id, project.Name, devices, zoneDtos, sensorEvents, activity);
     }
 
     private static DateTime? ToUtc(DateTime? value) => value is null
@@ -190,5 +205,11 @@ public sealed class ProjectDashboardQueryRepository(IConfiguration configuration
         public Guid ZoneId { get; init; }
         public string ZoneName { get; init; } = string.Empty;
         public DateTime OccurredAtUtc { get; init; }
+    }
+
+    private sealed class ZoneActivityRow
+    {
+        public Guid ZoneId { get; init; }
+        public int EventCount { get; init; }
     }
 }

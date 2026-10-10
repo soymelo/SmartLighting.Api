@@ -5,8 +5,10 @@ public sealed record GetProjectDashboardResponse(
     string Name,
     IReadOnlyCollection<GetProjectDashboardResponse.DeviceResponse> Devices,
     IReadOnlyCollection<GetProjectDashboardResponse.ZoneResponse> Zones,
-    IReadOnlyCollection<GetProjectDashboardResponse.SensorEventResponse> RecentSensorEvents)
+    IReadOnlyCollection<GetProjectDashboardResponse.SensorEventResponse> RecentSensorEvents,
+    IReadOnlyCollection<GetProjectDashboardResponse.ZoneActivityResponse> ZoneActivity24h)
 {
+    public sealed record ZoneActivityResponse(Guid ZoneId, int EventCount);
     public sealed record DeviceResponse(Guid DeviceId, string Name, DateTime? LastTelemetryAtUtc);
 
     public sealed record ZoneResponse(

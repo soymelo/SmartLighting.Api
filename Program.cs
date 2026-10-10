@@ -12,6 +12,7 @@ using SmartLighting.Api.Application.Features.Devices.CreateDevice;
 using SmartLighting.Api.Application.Features.Devices.GetDeviceById;
 using SmartLighting.Api.Application.Features.Devices.GetDevices;
 using SmartLighting.Api.Application.Features.Devices.UpdateDevice;
+using SmartLighting.Api.Application.Features.MachineLearning.GetMlDemo;
 using SmartLighting.Api.Application.Features.Projects.GetProjects;
 using SmartLighting.Api.Application.Features.Telemetry.SubmitTelemetry;
 using SmartLighting.Api.Application.Features.Topology.GetTopology;
@@ -37,6 +38,11 @@ builder.Services.AddScoped<IProjectDashboardQueryRepository, ProjectDashboardQue
 builder.Services.AddScoped<ITopologyQueryRepository, TopologyQueryRepository>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<ITelemetryRepository, TelemetryRepository>();
+builder.Services.AddHttpClient<MlDemoClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["MlDemo:BaseUrl"] ?? "http://127.0.0.1:8765/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 builder.Services.AddScoped<CreateDeviceProcessor>();
 builder.Services.AddScoped<GetDevicesProcessor>();
 builder.Services.AddScoped<GetDeviceByIdProcessor>();

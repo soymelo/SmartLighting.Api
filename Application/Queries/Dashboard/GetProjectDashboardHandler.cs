@@ -63,6 +63,9 @@ public sealed class GetProjectDashboardHandler(IProjectDashboardQueryRepository 
             dashboard.Name,
             devices,
             zones,
-            sensorEvents);
+            sensorEvents,
+            dashboard.ZoneActivity24h
+                .Select(item => new GetProjectDashboardResponse.ZoneActivityResponse(item.ZoneId, item.EventCount))
+                .ToList());
     }
 }
