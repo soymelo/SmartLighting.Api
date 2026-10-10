@@ -16,7 +16,7 @@ public sealed class GetTopologyEndpoint(GetTopologyProcessor processor)
         Summary(summary =>
         {
             summary.Summary = "Obter topologia do dispositivo";
-            summary.Description = "Retorna as zonas, sensores e luminárias configurados para um dispositivo.";
+            summary.Description = "Retorna as zonas do projeto e os sensores e luminárias participantes, com o dispositivo de cada componente, para controlar os LEDs locais.";
         });
     }
 

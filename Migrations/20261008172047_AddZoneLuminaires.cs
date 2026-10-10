@@ -11,6 +11,10 @@ namespace SmartLighting.Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Luminaires_Zones_ZoneId",
+                table: "Luminaires");
+
             migrationBuilder.CreateTable(
                 name: "ZoneLuminaires",
                 columns: table => new
@@ -45,10 +49,6 @@ namespace SmartLighting.Api.Migrations
                 SELECT [ZoneId], [Id]
                 FROM [Luminaires];
                 """);
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Luminaires_Zones_ZoneId",
-                table: "Luminaires");
 
             migrationBuilder.DropIndex(
                 name: "IX_Luminaires_ZoneId",

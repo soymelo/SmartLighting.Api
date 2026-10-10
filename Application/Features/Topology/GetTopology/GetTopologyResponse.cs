@@ -18,6 +18,7 @@ public sealed record GetTopologyResponse
 
     public sealed record SensorResponse(
         Guid SensorId,
+        Guid DeviceId,
         string Name,
         int Slot,
         int GpioNumber);
@@ -25,6 +26,7 @@ public sealed record GetTopologyResponse
     public sealed record LuminaireResponse
     (
         Guid LuminaireId,
+        Guid DeviceId,
         string Name,
         decimal NominalPowerWatts,
         int Slot,

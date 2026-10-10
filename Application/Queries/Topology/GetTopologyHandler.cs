@@ -9,7 +9,7 @@ public sealed class GetTopologyHandler(ITopologyQueryRepository topologyQueryRep
 {
     public async Task<GetTopologyResponse?> ExecuteAsync(GetTopologyQuery query, CancellationToken ct)
     {
-        var device = await topologyQueryRepository.GetTopologyByIdAsync(query.DeviceId, ct);
+        var device = await topologyQueryRepository.GetProjectControlTopologyByDeviceIdAsync(query.DeviceId, ct);
 
         if (device is null)
         {
@@ -23,7 +23,6 @@ public sealed class GetTopologyHandler(ITopologyQueryRepository topologyQueryRep
                 .Select(item => item.ZoneId)
                 .ToArray());
 
-        // O firmware atual aceita cada slot físico uma única vez no contrato de topologia.
         var zones = device.Zones
             .Select(zone => new GetTopologyResponse.ZoneResponse(
                 zone.ZoneId,
@@ -32,14 +31,15 @@ public sealed class GetTopologyHandler(ITopologyQueryRepository topologyQueryRep
                 zone.Sensors
                     .Select(sensor => new GetTopologyResponse.SensorResponse(
                         sensor.SensorId,
+                        sensor.DeviceId,
                         sensor.Name,
                         (int)sensor.Slot,
                         sensor.GpioNumber))
                     .ToList(),
                 zone.Luminaires
-                    .Where(luminaire => zoneIdsByLuminaire[luminaire.LuminaireId].First() == zone.ZoneId)
                     .Select(luminaire => new GetTopologyResponse.LuminaireResponse(
                         luminaire.LuminaireId,
+                        luminaire.DeviceId,
                         luminaire.Name,
                         luminaire.NominalPowerWatts,
                         (int)luminaire.Slot,

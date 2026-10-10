@@ -36,6 +36,34 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
         ORDER BY zl.ZoneId, l.Slot;
         """;
 
+    private const string ProjectControlTopologySql = """
+        DECLARE @ProjectId uniqueidentifier = (SELECT ProjectId FROM Devices WHERE Id = @DeviceId);
+
+        SELECT d.Id, d.Name, d.ProjectId
+        FROM Devices AS d
+        WHERE d.Id = @DeviceId;
+
+        SELECT z.Id, z.Name, z.DisplayOrder
+        FROM Zones AS z
+        WHERE z.ProjectId = @ProjectId
+        ORDER BY z.DisplayOrder, z.Id;
+
+        SELECT s.Id, s.DeviceId, s.ZoneId, s.Name, s.Slot
+        FROM Sensors AS s
+        INNER JOIN Devices AS d ON d.Id = s.DeviceId
+        INNER JOIN Zones AS z ON z.Id = s.ZoneId
+        WHERE d.ProjectId = @ProjectId AND z.ProjectId = @ProjectId
+        ORDER BY s.ZoneId, s.DeviceId, s.Slot;
+
+        SELECT l.Id, l.DeviceId, zl.ZoneId, l.Name, l.NominalPowerWatts, l.Slot
+        FROM Luminaires AS l
+        INNER JOIN Devices AS d ON d.Id = l.DeviceId
+        INNER JOIN ZoneLuminaires AS zl ON zl.LuminaireId = l.Id
+        INNER JOIN Zones AS z ON z.Id = zl.ZoneId
+        WHERE d.ProjectId = @ProjectId AND z.ProjectId = @ProjectId
+        ORDER BY zl.ZoneId, l.DeviceId, l.Slot;
+        """;
+
     private readonly string _connectionString = configuration.GetConnectionString("SmartLightingDatabase")
         ?? throw new InvalidOperationException("A connection string 'SmartLightingDatabase' não foi configurada.");
 
@@ -105,6 +133,58 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
             zoneDtos);
     }
 
+    public async Task<ProjectControlTopologyDto?> GetProjectControlTopologyByDeviceIdAsync(
+        Guid deviceId,
+        CancellationToken ct)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(ct);
+
+        using var results = await connection.QueryMultipleAsync(new CommandDefinition(
+            ProjectControlTopologySql,
+            new { DeviceId = deviceId },
+            cancellationToken: ct));
+        var device = await results.ReadSingleOrDefaultAsync<DeviceRow>();
+        if (device is null)
+        {
+            return null;
+        }
+
+        var zones = (await results.ReadAsync<ZoneRow>()).ToList();
+        var sensorsByZone = (await results.ReadAsync<ControlSensorRow>())
+            .GroupBy(sensor => sensor.ZoneId)
+            .ToDictionary(group => group.Key, group => (IReadOnlyCollection<ProjectControlSensorDto>)group
+                .Select(sensor => new ProjectControlSensorDto(
+                    sensor.Id,
+                    sensor.DeviceId,
+                    sensor.Name,
+                    sensor.Slot,
+                    Esp32Pinout.GetGpio(sensor.Slot)))
+                .ToList());
+        var luminairesByZone = (await results.ReadAsync<ControlLuminaireRow>())
+            .GroupBy(luminaire => luminaire.ZoneId)
+            .ToDictionary(group => group.Key, group => (IReadOnlyCollection<ProjectControlLuminaireDto>)group
+                .Select(luminaire => new ProjectControlLuminaireDto(
+                    luminaire.Id,
+                    luminaire.DeviceId,
+                    luminaire.Name,
+                    luminaire.NominalPowerWatts,
+                    luminaire.Slot,
+                    Esp32Pinout.GetGpio(luminaire.Slot)))
+                .ToList());
+
+        return new ProjectControlTopologyDto(
+            device.Id,
+            device.Name,
+            zones.Select(zone => new ProjectControlZoneDto(
+                zone.Id,
+                zone.Name,
+                zone.DisplayOrder,
+                sensorsByZone.GetValueOrDefault(zone.Id, Array.Empty<ProjectControlSensorDto>()),
+                luminairesByZone.GetValueOrDefault(zone.Id, Array.Empty<ProjectControlLuminaireDto>())))
+                .ToList());
+    }
+
     private sealed class DeviceRow
     {
         public Guid Id { get; init; }
@@ -132,6 +212,25 @@ public sealed class TopologyQueryRepository(IConfiguration configuration) : ITop
     private sealed class LuminaireRow
     {
         public Guid Id { get; init; }
+        public Guid ZoneId { get; init; }
+        public string Name { get; init; } = string.Empty;
+        public decimal NominalPowerWatts { get; init; }
+        public LuminaireSlot Slot { get; init; }
+    }
+
+    private sealed class ControlSensorRow
+    {
+        public Guid Id { get; init; }
+        public Guid DeviceId { get; init; }
+        public Guid ZoneId { get; init; }
+        public string Name { get; init; } = string.Empty;
+        public SensorSlot Slot { get; init; }
+    }
+
+    private sealed class ControlLuminaireRow
+    {
+        public Guid Id { get; init; }
+        public Guid DeviceId { get; init; }
         public Guid ZoneId { get; init; }
         public string Name { get; init; } = string.Empty;
         public decimal NominalPowerWatts { get; init; }
