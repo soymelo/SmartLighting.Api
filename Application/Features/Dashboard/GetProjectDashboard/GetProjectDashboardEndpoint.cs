@@ -16,7 +16,7 @@ public sealed class GetProjectDashboardEndpoint(GetProjectDashboardProcessor pro
         Summary(summary =>
         {
             summary.Summary = "Obter dashboard do projeto";
-            summary.Description = "Retorna os controladores, a topologia e até 50 eventos recentes do projeto.";
+            summary.Description = "Retorna os controladores, a topologia e a atividade por zona do projeto.";
         });
     }
 

@@ -47,23 +47,11 @@ public sealed class GetProjectDashboardHandler(IProjectDashboardQueryRepository 
                     .ToList()))
             .ToList();
 
-        var sensorEvents = dashboard.RecentSensorEvents
-            .Select(sensorEvent => new GetProjectDashboardResponse.SensorEventResponse(
-                sensorEvent.EventIdentifier,
-                sensorEvent.SensorId,
-                sensorEvent.DeviceId,
-                sensorEvent.SensorName,
-                sensorEvent.ZoneId,
-                sensorEvent.ZoneName,
-                sensorEvent.OccurredAtUtc))
-            .ToList();
-
         return new GetProjectDashboardResponse(
             dashboard.ProjectId,
             dashboard.Name,
             devices,
             zones,
-            sensorEvents,
             dashboard.ZoneActivity24h
                 .Select(item => new GetProjectDashboardResponse.ZoneActivityResponse(item.ZoneId, item.EventCount))
                 .ToList());

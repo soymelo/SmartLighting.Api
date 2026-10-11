@@ -44,20 +44,6 @@ public sealed class ProjectDashboardQueryRepository(IConfiguration configuration
         WHERE z.ProjectId = @ProjectId AND d.ProjectId = @ProjectId
         ORDER BY z.DisplayOrder, l.Name, l.Id;
 
-        SELECT TOP (50) se.EventIdentifier,
-                        se.SensorId,
-                        se.DeviceId,
-                        s.Name AS SensorName,
-                        z.Id AS ZoneId,
-                        z.Name AS ZoneName,
-                        se.OccurredAtUtc
-        FROM SensorEvents AS se
-        INNER JOIN Devices AS d ON d.Id = se.DeviceId
-        INNER JOIN Sensors AS s ON s.Id = se.SensorId
-        INNER JOIN Zones AS z ON z.Id = s.ZoneId
-        WHERE d.ProjectId = @ProjectId
-        ORDER BY se.OccurredAtUtc DESC, se.EventIdentifier DESC;
-
         SELECT s.ZoneId, COUNT(*) AS EventCount
         FROM SensorEvents AS se
         INNER JOIN Sensors AS s ON s.Id = se.SensorId
@@ -135,22 +121,11 @@ public sealed class ProjectDashboardQueryRepository(IConfiguration configuration
                 luminairesByZone.GetValueOrDefault(zone.ZoneId, Array.Empty<ProjectDashboardLuminaireDto>())))
             .ToList();
 
-        var sensorEvents = (await results.ReadAsync<SensorEventRow>())
-            .Select(sensorEvent => new ProjectDashboardSensorEventDto(
-                sensorEvent.EventIdentifier,
-                sensorEvent.SensorId,
-                sensorEvent.DeviceId,
-                sensorEvent.SensorName,
-                sensorEvent.ZoneId,
-                sensorEvent.ZoneName,
-                DateTime.SpecifyKind(sensorEvent.OccurredAtUtc, DateTimeKind.Utc)))
-            .ToList();
-
         var activity = (await results.ReadAsync<ZoneActivityRow>())
             .Select(row => new ProjectDashboardZoneActivityDto(row.ZoneId, row.EventCount))
             .ToList();
 
-        return new ProjectDashboardDto(project.Id, project.Name, devices, zoneDtos, sensorEvents, activity);
+        return new ProjectDashboardDto(project.Id, project.Name, devices, zoneDtos, activity);
     }
 
     private static DateTime? ToUtc(DateTime? value) => value is null
@@ -194,17 +169,6 @@ public sealed class ProjectDashboardQueryRepository(IConfiguration configuration
         public decimal NominalPowerWatts { get; init; }
         public int? BrightnessPercentage { get; init; }
         public DateTime? UpdatedAtUtc { get; init; }
-    }
-
-    private sealed class SensorEventRow
-    {
-        public Guid EventIdentifier { get; init; }
-        public Guid SensorId { get; init; }
-        public Guid DeviceId { get; init; }
-        public string SensorName { get; init; } = string.Empty;
-        public Guid ZoneId { get; init; }
-        public string ZoneName { get; init; } = string.Empty;
-        public DateTime OccurredAtUtc { get; init; }
     }
 
     private sealed class ZoneActivityRow

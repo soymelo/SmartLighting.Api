@@ -5,7 +5,6 @@ public sealed record GetProjectDashboardResponse(
     string Name,
     IReadOnlyCollection<GetProjectDashboardResponse.DeviceResponse> Devices,
     IReadOnlyCollection<GetProjectDashboardResponse.ZoneResponse> Zones,
-    IReadOnlyCollection<GetProjectDashboardResponse.SensorEventResponse> RecentSensorEvents,
     IReadOnlyCollection<GetProjectDashboardResponse.ZoneActivityResponse> ZoneActivity24h)
 {
     public sealed record ZoneActivityResponse(Guid ZoneId, int EventCount);
@@ -27,13 +26,4 @@ public sealed record GetProjectDashboardResponse(
         decimal NominalPowerWatts,
         int? BrightnessPercentage,
         DateTime? UpdatedAtUtc);
-
-    public sealed record SensorEventResponse(
-        Guid EventIdentifier,
-        Guid SensorId,
-        Guid DeviceId,
-        string SensorName,
-        Guid ZoneId,
-        string ZoneName,
-        DateTime OccurredAtUtc);
 }

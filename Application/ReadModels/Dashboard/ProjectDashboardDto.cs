@@ -5,7 +5,6 @@ public sealed record ProjectDashboardDto(
     string Name,
     IReadOnlyCollection<ProjectDashboardDeviceDto> Devices,
     IReadOnlyCollection<ProjectDashboardZoneDto> Zones,
-    IReadOnlyCollection<ProjectDashboardSensorEventDto> RecentSensorEvents,
     IReadOnlyCollection<ProjectDashboardZoneActivityDto> ZoneActivity24h);
 
 public sealed record ProjectDashboardZoneActivityDto(Guid ZoneId, int EventCount);
@@ -28,12 +27,3 @@ public sealed record ProjectDashboardLuminaireDto(
     decimal NominalPowerWatts,
     int? BrightnessPercentage,
     DateTime? UpdatedAtUtc);
-
-public sealed record ProjectDashboardSensorEventDto(
-    Guid EventIdentifier,
-    Guid SensorId,
-    Guid DeviceId,
-    string SensorName,
-    Guid ZoneId,
-    string ZoneName,
-    DateTime OccurredAtUtc);
