@@ -28,10 +28,13 @@ inicialização.
 
 As migrations criam o esquema, mas não cadastram projeto nem zonas. O
 protótipo oferece consulta de projetos e cadastro/atualização de dispositivos;
-não há endpoint de criação de projeto ou zona. Para usar um banco novo, crie
-primeiro o projeto e suas zonas por um script SQL controlado ou restaure um
-backup validado. Depois, cadastre os dispositivos pela Web e configure em cada
-ESP32 o `DeviceId` correspondente.
+não há endpoint de criação de projeto ou zona. Para um banco novo e vazio,
+execute [scripts/bootstrap-maquette.sql](scripts/bootstrap-maquette.sql) após
+aplicar as migrations. O script cria o projeto `Maquete TCC` e seis zonas; ele
+recusa execução se já houver projetos ou zonas. Para preservar uma base
+existente, use um backup validado ou prepare os cadastros de forma controlada.
+Depois, cadastre os dispositivos pela Web e configure em cada ESP32 o
+`DeviceId` correspondente.
 
 Os exemplos de requisição estão em [SmartLighting.Api.http](SmartLighting.Api.http).
 O firmware precisa acessar a API pelo endereço do computador na rede, não
