@@ -35,7 +35,7 @@ Content-Type: application/json
     {
       "slot": 1,
       "name": "LED 1",
-      "zoneId": "{{ZoneId}}",
+      "zoneIds": ["{{ZoneId}}"],
       "nominalPowerWatts": 10
     }
   ]
@@ -74,7 +74,7 @@ Content-Type: application/json
     {
       "slot": 1,
       "name": "LED 1",
-      "zoneId": "{{ZoneId}}",
+      "zoneIds": ["{{ZoneId}}"],
       "nominalPowerWatts": 10
     }
   ]
